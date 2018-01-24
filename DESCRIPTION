@@ -9,7 +9,15 @@ Description: The package is designed for interpreting genomic data by leveraging
              of genes, one contains a target list from an experiment and the 
              other contains all the genes in the experimental array. The output
              of the program is list of pathways and their respective p-values.
-             In the current version, the pathways are retrieved from KEGG.
+             In the current version, the pathways are retrieved from KEGG. 
+             If you wish to use this package in your publication or for your 
+             project please cite the following pulivation:
+             Naderi Yeganeh, Pourya, and M. Taghi Mostafavi. "Use of Structural 
+             Properties of Underlying Graphs in Pathway Enrichment Analysis of 
+             Genomic Data." In Proceedings of the 8th ACM International
+             Conference on Bioinformatics,Computational Biology, and 
+             Health Informatics, pp. 279-284. ACM, 2017.
+             
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
