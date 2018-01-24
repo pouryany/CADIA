@@ -1,0 +1,16 @@
+Package: PathwayDisturbance
+Type: Package
+Title: Pathway enrichment analysis of genomic using PathwayDisturbance Algorithm
+Version: 1.0
+Author: Pourya Naderi Yeganeh
+Maintainer: Pourya Naderi Yeganeh <pnaderiy@uncc.edu>
+Description: The package is designed for interpreting genomic data by leveraging
+             genetic interactions. Typical inputs of this program are two lists
+             of genes, one contains a target list from an experiment and the 
+             other contains all the genes in the experimental array. The output
+             of the program is list of pathways and their respective p-values.
+             In the current version, the pathways are retrieved from KEGG.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
