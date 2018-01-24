@@ -7,10 +7,11 @@
 geneKEGGListExtractor(listOfPathwayFiles)
 }
 \arguments{
-\item{listOfPathwayFiles}{An input containing a list of pathways}
+\item{listOfPathwayFiles}{An input containing a list of pathways where the
+original files are in the format of KGML.}
 }
 \value{
-A list of genes with associated KEGG ID
+A list of genes using associated KEGG ID
 }
 \description{
 Extracts all the genes in a given list of pathways

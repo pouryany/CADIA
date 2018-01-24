@@ -1,13 +1,16 @@
-#'  Finds an underlying DAG of a given graph pathway
+#' Finds an underlying DAG of a given graph pathway
+#' Uses a greedy hueristic
 #'
-#'  @param inputGraphDAG is the graph of the pathways
-#'  @return processed graph without anyloops or self loops
+#' @param inputGraphDAG  the graph of the pathway to be processed
+#' @return processed graph without anyloops or self loops
+#' @importFrom RBGL removeSelfLoops strongComp
 #'
 #'
 #'
-#'
+#' @export
 DAGprocessor <- function(inputGraphDAG)
 {
+    inputGraphDAG <- removeSelfLoops(inputGraphDAG)
 
     if(length(tsort(inputGraphDAG) == 0))
     {
@@ -36,4 +39,3 @@ DAGprocessor <- function(inputGraphDAG)
         }
     }
 }
-
