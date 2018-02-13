@@ -33,25 +33,49 @@ pathSampler <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID) {
 
     if (length(deMatUnRef) < 2){
         causalDisturbance <- 1
-    } else{
+        return(0)
+    } else if (sizeDE == 0){
+        return(1)
+    }else{
         deTotalPathsUnRef <- pathCounter(deMatUnRef,eyeDE)
         causalDisturbance <- 1 - (deTotalPathsUnRef/totalPaths)
+
+
+        for (i in 1:iterationNo) {
+            randPerm <- logical(totGenes)
+            posPerm <- sample(1:totGenes, sizeDE,replace = F)
+            randPerm[posPerm] = TRUE
+            randMatUnRefSample      <- pathMat[!randPerm,!randPerm]
+            totalPathsUnRefSample   <- pathCounter(randMatUnRefSample,eyeDE)
+            samplingData[i]         <- 1 - (totalPathsUnRefSample / totalPaths)
+        }
+
+        sampleDist      <- stats::ecdf(unlist(samplingData))
+        disturbProb     <- 1 - sampleDist(causalDisturbance)
+
+        iter2 <- iterationNo
+
+        while(disturbProb == 0 && iter2 < 6 * iterationNo){
+
+             for (i in iter2:(iter2 +iterationNo))
+                {
+                randPerm <- logical(totGenes)
+                posPerm <- sample(1:totGenes, sizeDE,replace = F)
+                randPerm[posPerm] = TRUE
+                randMatUnRefSample     <- pathMat[!randPerm,!randPerm]
+                totalPathsUnRefSample  <- pathCounter(randMatUnRefSample,eyeDE)
+                samplingData[i]        <- 1-(totalPathsUnRefSample / totalPaths)
+             }
+
+            iter2         <- iter2 +iterationNo
+            sampleDist    <- stats::ecdf(unlist(samplingData))
+            disturbProb   <- 1 - sampleDist(causalDisturbance)
+        }
+
+
+
+        return(disturbProb)
+       # return(list(samplingData, causalDisturbance))
     }
-
-
-
-    for (i in 1:iterationNo) {
-        randPerm <- logical(totGenes)
-        posPerm <- sample(1:totGenes, sizeDE,replace = F)
-        randPerm[posPerm] = TRUE
-
-
-        randMatUnRefSample      <- pathMat[!randPerm,!randPerm]
-        totalPathsUnRefSample   <- pathCounter(randMatUnRefSample,eyeDE)
-        samplingData[i]         <- 1 - (totalPathsUnRefSample / totalPaths)
-    }
-
-
-    return(list(samplingData, causalDisturbance))
 }
 

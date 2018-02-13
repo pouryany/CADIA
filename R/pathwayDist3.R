@@ -26,9 +26,10 @@ processPathway <- function(pGraph,Name, deKIDs, allKIDs, keggRef, iter) {
 
     fTestRes        <- stats::phyper(isDiff - 1, totPath, allSize - totPath,
                                      deSize, lower.tail = F)
-    sampledGraphs   <- pathSampler(pGraph, iter, deKIDs, allKIDs)
-    sampleDist      <- stats::ecdf(unlist(sampledGraphs[1]))
-    disturbProb     <- 1 - sampleDist(unlist(sampledGraphs[2]))
+    disturbProb     <- pathSampler(pGraph, iter, deKIDs, allKIDs)
+    # sampledGraphs   <- pathSampler(pGraph, iter, deKIDs, allKIDs)
+    # sampleDist      <- stats::ecdf(unlist(sampledGraphs[1]))
+    # disturbProb     <- 1 - sampleDist(unlist(sampledGraphs[2]))
     causalDist      <- stats::pchisq(-2 * sum(log(fTestRes), log(disturbProb)),
                                      df = 4, lower.tail = FALSE)
 

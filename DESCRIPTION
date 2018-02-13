@@ -17,7 +17,6 @@ Description: (Under construction) The package is designed for interpreting genom
              Genomic Data." In Proceedings of the 8th ACM International
              Conference on Bioinformatics,Computational Biology, and 
              Health Informatics, pp. 279-284. ACM, 2017.
-             
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
