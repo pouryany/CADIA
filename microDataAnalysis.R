@@ -72,7 +72,7 @@ GSE.tissue    <- factor(GSE.pheno.table$source_name_ch1)
         deKID              <- translateGeneID2KEGGID(GSE.deGenes.names)
         allKID             <- translateGeneID2KEGGID(GSE.allGene.names)
 
-        GSE.paired.Pathways <- causalDisturbance(GSE.deGenes.names,GSE.allGene.names,iter = 500)
+        GSE.paired.Pathways <- causalDisturbance(GSE.deGenes.names,GSE.allGene.names,iter = 10000)
         GSE.paired.Pathways.Clean <- GSE.paired.Pathways[GSE.paired.Pathways$`No. DE` !=0,]
         GSE.paired.Pathways.Clean$CDIST <- p.adjust(as.numeric(
             as.character(GSE.paired.Pathways.Clean$`causal Disturbance`)), method = "BH")

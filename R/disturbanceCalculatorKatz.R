@@ -10,7 +10,7 @@
 #'
 #'
 #'
-pathSampler.cdist <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID) {
+pathSampler.katz <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID) {
 
 
 
@@ -23,7 +23,7 @@ pathSampler.cdist <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID
     eyeDE        <- diag(totGenes - sizeDE)
     samplingData <- rep(0,iterationNo)
     pathMat      <- as(pathwayRefGraphExpanded, "matrix")
-    totalPaths   <- pathCounter(pathMat,eyeTot)
+    totalPaths   <- pathCounter.katz(pathMat,eyeTot,0.5)
     deGenesInd   <- totPathNodes %in% deKID
     deGenes      <- totPathNodes[deGenesInd]
     deMatUnRef   <- pathMat[!deGenesInd,!deGenesInd]
@@ -34,7 +34,7 @@ pathSampler.cdist <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID
         } else if (sizeDE == 0){
             return(1)
         }else{
-            deTotalPathsUnRef <- pathCounter(deMatUnRef,eyeDE)
+            deTotalPathsUnRef <- pathCounter.katz(deMatUnRef,eyeDE,0.5)
             causalDisturbance <- 1 - (deTotalPathsUnRef/totalPaths)
 
 
@@ -43,7 +43,8 @@ pathSampler.cdist <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID
                 posPerm <- sample(1:totGenes, sizeDE,replace = F)
                 randPerm[posPerm] = TRUE
                 randMatUnRefSample      <- pathMat[!randPerm,!randPerm]
-                totalPathsUnRefSample   <- pathCounter(randMatUnRefSample,eyeDE)
+                totalPathsUnRefSample   <- pathCounter.katz(randMatUnRefSample
+                                                            ,eyeDE,0.5)
                 samplingData[i]         <- 1 - (totalPathsUnRefSample / totalPaths)
             }
 
@@ -59,7 +60,8 @@ pathSampler.cdist <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID
                     posPerm <- sample(1:totGenes, sizeDE,replace = F)
                     randPerm[posPerm] = TRUE
                     randMatUnRefSample     <- pathMat[!randPerm,!randPerm]
-                    totalPathsUnRefSample  <- pathCounter(randMatUnRefSample,eyeDE)
+                    totalPathsUnRefSample  <- pathCounter.katz(randMatUnRefSample
+                                                               ,eyeDE, 0.5)
                     samplingData[i]        <- 1-(totalPathsUnRefSample / totalPaths)
                  }
 

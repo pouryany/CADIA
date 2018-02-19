@@ -13,7 +13,7 @@
 #' @export
 #'
 #'
-causalDisturbance <- function(deIDs, allIDs, iter = 2000){
+causalDisturbance <- function(deIDs, allIDs, iter = 2000, alpha){
 
     deKID   <- KEGGgraph::translateGeneID2KEGGID(deIDs)
     allKID  <- KEGGgraph::translateGeneID2KEGGID(allIDs)
@@ -22,7 +22,7 @@ causalDisturbance <- function(deIDs, allIDs, iter = 2000){
 
     for ( i in 1:len ) {
         res[i] <- list(unlist(processPathway(cleanPathList[[i]],cleanPathNames[i,1],
-                                        deKID, allKID, keggRefGenes,iter )))
+                                        deKID, allKID, keggRefGenes,iter, alpha )))
         print(cat("Pathway done \n pathway name:", cleanPathNames[i,1]))
     }
 

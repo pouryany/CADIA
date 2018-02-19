@@ -32,6 +32,8 @@ LogC <- (qx[5] > 100) ||
 if (LogC) { ex[which(ex <= 0)] <- NaN
 exprs(gset) <- log2(ex) }
 
+#boxplot(exprs(gset))
+
 # set up the data and proceed with analysis
 sml <- paste("G", sml, sep="")    # set group names
 fl <- as.factor(sml)
@@ -40,7 +42,7 @@ gset$batch <- gset$`batch:ch1`
 gset$sid <- gset$`subject:ch1`
 gset$batch
 
-design <- model.matrix(~ description + gset$batch , gset)
+design <- model.matrix(~ description +gset$sid + gset$batch , gset)
 design
 fit <- lmFit(gset, design)
 fit1 <- eBayes(fit)
@@ -62,17 +64,16 @@ deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 allKID
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 2000)
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 5000,0.7)
 tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
                                     tT.pathways.clean$`causal Disturbance`))
-                                    ,method = "BH")
+                                    ,method = "fdr")
 tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
-                                    (tT.pathways.clean$P_ORA)),method = "BH")
+                                    (tT.pathways.clean$P_ORA)),method = "fdr")
 
 
 tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
 tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
-tT.pathways.clean[order(tT.pathways.clean$`disturbance index`),]
-
+head(tT.pathways.clean[order(tT.pathways.clean$CDIST),],10)
 

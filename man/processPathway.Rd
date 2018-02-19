@@ -4,7 +4,7 @@
 \alias{processPathway}
 \title{Calculates some information regarding the pathways}
 \usage{
-processPathway(pGraph, Name, deKIDs, allKIDs, keggRef, iter)
+processPathway(pGraph, Name, deKIDs, allKIDs, keggRef, iter, alpha)
 }
 \arguments{
 \item{pGraph}{a GraphNEL object containing the pathways}

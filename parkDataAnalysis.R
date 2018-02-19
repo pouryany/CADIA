@@ -59,7 +59,7 @@ park.pathways.clean$CDIST <- p.adjust(as.numeric(
     as.character(park.pathways.clean$`causal Disturbance`)), method = "BH")
 as.numeric(as.character(park.pathways.clean$P_ORA))
 
-park.pathways.clean[as.numeric(as.character(park.pathways.clean$CDIST)) < 0.2,]
+park.pathways.clean[as.numeric(as.character(park.pathways.clean$CDIST)) < 0.5,]
 
 
 

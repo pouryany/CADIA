@@ -10,7 +10,7 @@
 #'
 #'
 #'
-pathSampler.cdist <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID) {
+pathSampler.newPath <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID,alpha) {
 
 
 
@@ -18,33 +18,45 @@ pathSampler.cdist <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID
     totGenes         <- length(totPathNodes)
     eyeTot           <- diag(totGenes)
 
-
     sizeDE       <- sum(totPathNodes %in% deKID)
     eyeDE        <- diag(totGenes - sizeDE)
     samplingData <- rep(0,iterationNo)
     pathMat      <- as(pathwayRefGraphExpanded, "matrix")
-    totalPaths   <- pathCounter(pathMat,eyeTot)
+    #totalPaths   <- pathCounter.(pathMat,eyeTot,0.5)
     deGenesInd   <- totPathNodes %in% deKID
     deGenes      <- totPathNodes[deGenesInd]
-    deMatUnRef   <- pathMat[!deGenesInd,!deGenesInd]
+    eye          <- diag(nrow(pathMat))
+    deMatUnRef   <- pathMat[deGenesInd,deGenesInd]
 
     if (length(deMatUnRef) < 2){
             causalDisturbance <- 1
-            return(0)
+            return(1)
         } else if (sizeDE == 0){
             return(1)
         }else{
-            deTotalPathsUnRef <- pathCounter(deMatUnRef,eyeDE)
-            causalDisturbance <- 1 - (deTotalPathsUnRef/totalPaths)
+            pathMat.out  <- solve(eye - alpha * pathMat)
+            pathMat.in   <- solve(eye - alpha * t(pathMat))
+
+            cdist.out <- sum(pathMat.out[deGenesInd,])
+            cdist.in  <- sum(pathMat.in[deGenesInd,])
+
+            cdist.tot <- cdist.in + cdist.out
+            paths.tot <- sum(pathMat.in + pathMat.out)
+
+
+            #deTotalPathsUnRef <- pathCounter.katz(deMatUnRef,eyeDE,0.5)
+            causalDisturbance <- 1 - (cdist.tot/paths.tot)
 
 
             for (i in 1:iterationNo) {
                 randPerm <- logical(totGenes)
                 posPerm <- sample(1:totGenes, sizeDE,replace = F)
                 randPerm[posPerm] = TRUE
-                randMatUnRefSample      <- pathMat[!randPerm,!randPerm]
-                totalPathsUnRefSample   <- pathCounter(randMatUnRefSample,eyeDE)
-                samplingData[i]         <- 1 - (totalPathsUnRefSample / totalPaths)
+
+                cdist.out.rand  <- sum(pathMat.out[randPerm,])
+                cdist.in.rand   <- sum(pathMat.in[randPerm,])
+                cdist.tot.rand  <- cdist.in.rand + cdist.out.rand
+                samplingData[i] <- 1 - (cdist.tot.rand / paths.tot)
             }
 
             sampleDist      <- stats::ecdf(unlist(samplingData))
@@ -55,13 +67,15 @@ pathSampler.cdist <- function(pathwayRefGraphExpanded,iterationNo, deKID, allKID
 
                  for (i in iter2:(iter2 +iterationNo))
                     {
-                    randPerm <- logical(totGenes)
-                    posPerm <- sample(1:totGenes, sizeDE,replace = F)
-                    randPerm[posPerm] = TRUE
-                    randMatUnRefSample     <- pathMat[!randPerm,!randPerm]
-                    totalPathsUnRefSample  <- pathCounter(randMatUnRefSample,eyeDE)
-                    samplingData[i]        <- 1-(totalPathsUnRefSample / totalPaths)
-                 }
+                     randPerm <- logical(totGenes)
+                     posPerm <- sample(1:totGenes, sizeDE,replace = F)
+                     randPerm[posPerm] = TRUE
+
+                     cdist.out.rand  <- sum(pathMat.out[randPerm,])
+                     cdist.in.rand   <- sum(pathMat.in[randPerm,])
+                     cdist.tot.rand  <- cdist.in.rand + cdist.out.rand
+                     samplingData[i] <- 1 - (cdist.tot.rand / paths.tot)
+                    }
 
                 iter2         <- iter2 +iterationNo
                 sampleDist    <- stats::ecdf(unlist(samplingData))

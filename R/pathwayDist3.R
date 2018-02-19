@@ -12,7 +12,7 @@
 #'
 #'
 
-processPathway <- function(pGraph,Name, deKIDs, allKIDs, keggRef, iter) {
+processPathway <- function(pGraph,Name, deKIDs, allKIDs, keggRef, iter,alpha) {
 
     tempNodes   <- nodes(pGraph) %in% allKIDs
     nodeNums    <- nodes(pGraph)[tempNodes]
@@ -26,7 +26,7 @@ processPathway <- function(pGraph,Name, deKIDs, allKIDs, keggRef, iter) {
 
     fTestRes        <- stats::phyper(isDiff - 1, totPath, allSize - totPath,
                                      deSize, lower.tail = F)
-    disturbProb     <- pathSampler(pGraph, iter, deKIDs, allKIDs)
+    disturbProb     <- pathSampler.newPath(pGraph, iter, deKIDs, allKIDs,alpha)
     # sampledGraphs   <- pathSampler(pGraph, iter, deKIDs, allKIDs)
     # sampleDist      <- stats::ecdf(unlist(sampledGraphs[1]))
     # disturbProb     <- 1 - sampleDist(unlist(sampledGraphs[2]))

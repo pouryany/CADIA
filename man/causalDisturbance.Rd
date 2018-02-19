@@ -5,7 +5,7 @@
 \title{Calculates enrichment analysis of KEGG pathways based on causal disturbance
 model. For more information, see publication doi>10.1145/3107411.3107488}
 \usage{
-causalDisturbance(deIDs, allIDs, iter = 2000)
+causalDisturbance(deIDs, allIDs, iter = 2000, alpha)
 }
 \arguments{
 \item{deIDs}{a list of differentially expressed genes}
