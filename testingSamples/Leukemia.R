@@ -46,7 +46,7 @@ tT <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
 
 tT.filter  <- tT[!is.na(tT$Gene.ID),]
 tT.filter  <- tT.filter[!duplicated(tT.filter$Gene.ID),]
-tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.01, ]
+tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.001, ]
 tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
 tT.deGenes
 
@@ -55,7 +55,7 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000, 0.5)
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 20000, 0.5)
 tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
@@ -64,8 +64,8 @@ tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
                                                 (tT.pathways.clean$P_ORA)),method = "fdr")
 
 
-tT.pathways.clean[tT.pathways.clean$CDIST < 0.1,]
-tT.pathways.clean[tT.pathways.clean$ORAFDR <0.1,]
+tT.pathways.clean[tT.pathways.clean$CDIST < 0.3,]
+tT.pathways.clean[tT.pathways.clean$ORAFDR <0.3,]
 
 head(tT.pathways.clean[order(tT.pathways.clean$ORAFDR),],20)
 

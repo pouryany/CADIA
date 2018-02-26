@@ -17,17 +17,17 @@ causalDisturbance <- function(deIDs, allIDs, iter = 2000, alpha){
 
     deKID   <- KEGGgraph::translateGeneID2KEGGID(deIDs)
     allKID  <- KEGGgraph::translateGeneID2KEGGID(allIDs)
-    len     <- nrow(cleanPathNames)
+    len     <- length(pathways.collection.names)
     res     <- vector ("list", length = len)
 
     for ( i in 1:len ) {
-        res[i] <- list(unlist(processPathway(cleanPathList[[i]],cleanPathNames[i,1],
+        res[i] <- list(unlist(processPathway(pathways.collection[[i]],pathways.collection.names[[i]],
                                         deKID, allKID, keggRefGenes,iter, alpha )))
-        print(cat("Pathway done \n pathway name:", cleanPathNames[i,1]))
+        print(cat("Pathway done \n pathway name:", pathways.collection.names[[i]]))
     }
 
     res <- as.data.frame(res)
-    colnames(res) <- cleanPathNames[,1]
+    colnames(res) <- names(pathways.collection.names)
     rownames(res)  <- c("Name","nodes","edges","P_ORA",
                         "No. DE","disturbance index", "causal Disturbance")
 
