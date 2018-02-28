@@ -55,7 +55,7 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 30000, 0.5)
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 20000, 0.4)
 tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
@@ -69,6 +69,38 @@ tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
 
 head(tT.pathways.clean[order(tT.pathways.clean$CDIST),],10)
 
+
+## Exporting Results
+
+tT.pathways.clean$KEGGID <- str_sub(rownames(tT.pathways.clean), end = -5)
+
+rownames(tT.pathways.clean) <- NULL
+
+neckC.cdist  <- tT.pathways.clean[tT.pathways.clean$CDIST < 0.1,]
+neckC.ora    <- tT.pathways.clean[tT.pathways.clean$ORAFDR <0.1,]
+sapply(neckC.cdist, mode)
+
+
+neckC.cdist <- neckC.cdist[order(neckC.cdist$CDIST),c(1,10,4,6,8,9)]
+neckC.ora <- neckC.ora[order(neckC.ora$ORAFDR),c(1,10,8,9)]
+neckC.cdist[,c(3,4,5,6)] <- mapply(as.character,neckC.cdist[,c(3,4,5,6)])
+neckC.cdist[,c(3,4,5,6)] <- mapply(as.numeric,neckC.cdist[,c(3,4,5,6)])
+
+neckC.cdist[,c(3,4,5,6)] <- mapply(formatC,neckC.cdist[,c(3,4,5,6)],
+                                      MoreArgs = list(format = "e", digits = 2))
+neckC.ora[,c(3,4)]   <- mapply(formatC,neckC.ora[,c(3,4)],
+                                  MoreArgs = list(format = "e", digits = 2))
+
+neckC.ora
+neckC.cdist
+
+
+library(xtable)
+options(xtable.floating = FALSE)
+options(xtable.timestamp = "")
+
+print(xtable(neckC.cdist), include.rownames = FALSE)
+print(xtable(neckC.ora), include.rownames = FALSE)
 
 
 

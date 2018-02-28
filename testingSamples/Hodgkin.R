@@ -138,8 +138,11 @@ nsample <- grep("G0", fl)
 csample <- grep("G1", fl)
 
 
+rownames(expdata.clean) <- sample(rownames(expdata.clean))
+
+
 a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
-          compare = "unpaired")
+          compare = "unpaired",saaTest = gs.KSTest)
 
 head(a$less[,1:5],20)
 
