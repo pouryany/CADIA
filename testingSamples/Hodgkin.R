@@ -141,8 +141,18 @@ csample <- grep("G1", fl)
 rownames(expdata.clean) <- sample(rownames(expdata.clean))
 
 
+
+tT.filter$Gene.ID
+
+log.fc <- tT.filter$logFC
+class(as.vector(log.fc))
+names(log.fc) <- tT.filter$Gene.ID
+class(log.fc)
 a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
           compare = "unpaired",saaTest = gs.KSTest)
+log.fc
+a <- gage(log.fc, gsets = p.kegg.gsets, ref = NULL, sample = NULL)
+tT.filter
 
 head(a$less[,1:5],20)
 
