@@ -69,3 +69,42 @@ tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
 
 head(tT.pathways.clean[order(tT.pathways.clean$CDIST),],10)
 
+
+
+
+
+
+
+
+
+
+library(gage)
+data("kegg.gs")
+kg.hsa=kegg.gsets("hsa")
+kegg.gs=kg.hsa$kg.sets[kg.hsa$sigmet.idx]
+av.paths <- names(kegg.gs)
+av.paths <- str_sub(av.paths, start =10)
+pathways.collection.names[!(pathways.collection.names %in% av.paths)]
+p.kegg.gsets <- lapply(pathways.collection,nodes)
+p.kegg.gsets <- mapply(str_sub,p.kegg.gsets, MoreArgs = list(start = 5) )
+
+names(p.kegg.gsets) <- pathways.collection.names
+p.kegg.gsets
+expdata <- exprs(gset)
+head(tT.filter)
+expdata.clean <- expdata[row.names(expdata) %in% rownames(tT.filter),]
+head(expdata.clean)
+
+tmp1 <- tT.filter[rownames(expdata.clean),]
+rownames(expdata.clean) <- tmp1$Gene.ID
+
+nsample <- grep("G0", fl)
+csample <- grep("G1", fl)
+
+
+a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
+          compare = "unpaired",same.dir = F, saaTest = gs.KSTest)
+
+head(a$greater[,1:5],10)
+
+
