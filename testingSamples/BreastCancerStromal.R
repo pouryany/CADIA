@@ -60,8 +60,8 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 30000, 0.5)
-tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000, 0.4)
+tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` ==0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")

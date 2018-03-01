@@ -54,7 +54,9 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 20000, 0.4)
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000, 0.4)
+tT.pathways[tT.pathways$`disturbance index` ==0,]$`disturbance index` <- NA
+
 tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
@@ -138,7 +140,7 @@ nsample <- grep("G0", fl)
 csample <- grep("G1", fl)
 
 
-rownames(expdata.clean) <- sample(rownames(expdata.clean))
+#rownames(expdata.clean) <- sample(rownames(expdata.clean))
 
 
 
@@ -149,12 +151,12 @@ class(as.vector(log.fc))
 names(log.fc) <- tT.filter$Gene.ID
 class(log.fc)
 a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
-          compare = "unpaired",saaTest = gs.KSTest)
+          compare = "unpaired",  use.fold = F)
 log.fc
 a <- gage(log.fc, gsets = p.kegg.gsets, ref = NULL, sample = NULL)
 tT.filter
 
-head(a$less[,1:5],20)
+head(a$less[,1:5],10)
 
 
 
