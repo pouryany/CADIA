@@ -30,9 +30,12 @@ processPathway <- function(pGraph,Name, deKIDs, allKIDs, keggRef, iter,alpha) {
     # sampledGraphs   <- pathSampler(pGraph, iter, deKIDs, allKIDs)
     # sampleDist      <- stats::ecdf(unlist(sampledGraphs[1]))
     # disturbProb     <- 1 - sampleDist(unlist(sampledGraphs[2]))
-    causalDist      <- stats::pchisq(-2 * sum(log(fTestRes), log(disturbProb)),
+    if(is.na(disturbProb)){
+        causalDist <- fTestRes
+    }else{
+         causalDist      <- stats::pchisq(-2 * sum(log(fTestRes), log(disturbProb)),
                                      df = 4, lower.tail = FALSE)
-
+         }
 
     #cat("pathway done: ", Name,"\n")
     return(list(Name,numNodes(pGraph),numEdges(pGraph),fTestRes,

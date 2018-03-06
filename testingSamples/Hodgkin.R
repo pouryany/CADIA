@@ -54,10 +54,9 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000, 0.4)
-tT.pathways[tT.pathways$`disturbance index` ==0,]$`disturbance index` <- NA
-
-tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 20000, 0.4)
+tT.pathways.clean <-tT.pathways
+#tT.pathways.clean <- tT.pathways[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")
@@ -103,6 +102,29 @@ print.xtable(Hodgkins.cdist, include.rownames = FALSE)
 print(xtable(Hodgkins.ora), include.rownames = FALSE)
 
 head(tT.pathways.clean[order(tT.pathways.clean$ORAFDR),],10)
+
+
+
+#SPIA RESULTs
+
+library(SPIA)
+deSPIA <- tT.deGenes$logFC
+names(deSPIA)<- tT.deGenes$Gene.ID
+allSPIA <- tT.filter$Gene.ID
+
+
+resSPIA <- spia(de=deSPIA,all=allSPIA,organism="hsa",nB=2000
+                ,plots=FALSE,beta=NULL,combine="fisher",verbose=FALSE)
+
+
+head(resSPIA)
+resSPIA.report <- resSPIA[order(resSPIA$pGFdr),c(1,2,9)]
+resSPIA.report[,3] <- mapply(formatC,resSPIA.report[,3],
+                             MoreArgs = list(format = "e", digits = 2))
+
+resSPIA.report <- resSPIA.report[as.numeric(resSPIA.report$pGFdr) <0.05,]
+print(xtable(resSPIA.report), include.rownames = FALSE)
+
 
 
 
@@ -156,7 +178,7 @@ log.fc
 a <- gage(log.fc, gsets = p.kegg.gsets, ref = NULL, sample = NULL)
 tT.filter
 
-head(a$less[,1:5],10)
+head(a$less[,1:5],30)
 
 
 

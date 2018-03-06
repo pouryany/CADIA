@@ -3,6 +3,7 @@
 export(DAGprocessor)
 export(causalDisturbance)
 export(geneKEGGListExtractor)
+export(newpath.centrality)
 importFrom(KEGGgraph,translateGeneID2KEGGID)
 importFrom(RBGL,removeSelfLoops)
 importFrom(RBGL,strongComp)

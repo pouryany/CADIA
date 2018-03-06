@@ -34,15 +34,13 @@ pathSampler.newPath <- function(pathwayRefGraphExpanded,iterationNo, deKID, allK
         } else if (sizeDE == 0){
             return(1)
         }else{
-            pathMat.out  <- solve(eye - alpha * pathMat)
-            pathMat.in   <- solve(eye - alpha * t(pathMat))
 
-            cdist.out <- sum(pathMat.out[deGenesInd,])
-            cdist.in  <- sum(pathMat.in[deGenesInd,])
+            #cdist.out <- sum(pathMat.out[deGenesInd,])
+            #cdist.in  <- sum(pathMat.in[deGenesInd,])
 
-            cdist.tot <- cdist.in + cdist.out
-            paths.tot <- sum(pathMat.in + pathMat.out)
-
+            centr.mat <- newpath.centrality(pathMat, alpha, beta =1)
+            paths.tot <- sum(centr.mat)
+            cdist.tot <- sum(centr.mat[deGenesInd,])
 
             #deTotalPathsUnRef <- pathCounter.katz(deMatUnRef,eyeDE,0.5)
             causalDisturbance <- 1 - (cdist.tot/paths.tot)
@@ -53,9 +51,11 @@ pathSampler.newPath <- function(pathwayRefGraphExpanded,iterationNo, deKID, allK
                 posPerm <- sample(1:totGenes, sizeDE,replace = F)
                 randPerm[posPerm] = TRUE
 
-                cdist.out.rand  <- sum(pathMat.out[randPerm,])
-                cdist.in.rand   <- sum(pathMat.in[randPerm,])
-                cdist.tot.rand  <- cdist.in.rand + cdist.out.rand
+
+                cdist.tot.rand <- sum(centr.mat[randPerm,])
+                # cdist.out.rand  <- sum(pathMat.out[randPerm,])
+                # cdist.in.rand   <- sum(pathMat.in[randPerm,])
+                # cdist.tot.rand  <- cdist.in.rand + cdist.out.rand
                 samplingData[i] <- 1 - (cdist.tot.rand / paths.tot)
             }
 
@@ -63,24 +63,32 @@ pathSampler.newPath <- function(pathwayRefGraphExpanded,iterationNo, deKID, allK
             disturbProb     <- 1 - sampleDist(causalDisturbance)
             iter2 <- iterationNo
 
-            while(disturbProb == 0 && iter2 < 6 * iterationNo){
-
-                 for (i in iter2:(iter2 +iterationNo))
-                    {
-                     randPerm <- logical(totGenes)
-                     posPerm <- sample(1:totGenes, sizeDE,replace = F)
-                     randPerm[posPerm] = TRUE
-
-                     cdist.out.rand  <- sum(pathMat.out[randPerm,])
-                     cdist.in.rand   <- sum(pathMat.in[randPerm,])
-                     cdist.tot.rand  <- cdist.in.rand + cdist.out.rand
-                     samplingData[i] <- 1 - (cdist.tot.rand / paths.tot)
-                    }
-
-                iter2         <- iter2 +iterationNo
-                sampleDist    <- stats::ecdf(unlist(samplingData))
-                disturbProb   <- 1 - sampleDist(causalDisturbance)
-        }
+            # while(disturbProb == 0 && iter2 < 6 * iterationNo){
+            #
+            #      for (i in iter2:(iter2 +iterationNo))
+            #         {
+            #          randPerm <- logical(totGenes)
+            #          posPerm <- sample(1:totGenes, sizeDE,replace = F)
+            #          randPerm[posPerm] = TRUE
+            #
+            #          cdist.tot.rand <- sum(centr.mat[randPerm,])
+            #          # cdist.out.rand  <- sum(pathMat.out[randPerm,])
+            #          # cdist.in.rand   <- sum(pathMat.in[randPerm,])
+            #          # cdist.tot.rand  <- cdist.in.rand + cdist.out.rand
+            #           samplingData[i] <- 1 - (cdist.tot.rand / paths.tot)
+            #         }
+            #
+            #
+            #
+            #     iter2         <- iter2 +iterationNo
+            #     sampleDist    <- stats::ecdf(unlist(samplingData))
+            #     disturbProb   <- 1 - sampleDist(causalDisturbance)
+            # }
+            #
+            if(disturbProb == 0)  {
+                # disturbProb <- 1/iterationNo
+                disturbProb <- NA
+            }
 
 
 

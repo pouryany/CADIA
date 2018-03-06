@@ -107,6 +107,29 @@ print(xtable(Hodgkins.ora), include.rownames = FALSE)
 
 
 
+#SPIA RESULTs
+
+deSPIA <- tT.deGenes$logFC
+names(deSPIA)<- tT.deGenes$Gene.ID
+allSPIA <- tT.filter$Gene.ID
+
+
+resSPIA <- spia(de=deSPIA,all=allSPIA,organism="hsa",nB=2000
+                ,plots=FALSE,beta=NULL,combine="fisher",verbose=FALSE)
+
+
+head(resSPIA)
+resSPIA.report <- resSPIA[order(resSPIA$pGFdr),c(1,2,9)]
+resSPIA.report[,3] <- mapply(formatC,resSPIA.report[,3],
+                             MoreArgs = list(format = "e", digits = 2))
+
+resSPIA.report <- resSPIA.report[as.numeric(resSPIA.report$pGFdr) <0.1,]
+print(xtable(resSPIA.report), include.rownames = FALSE)
+
+
+
+
+
 
 
 library(gage)
@@ -137,6 +160,45 @@ a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
           compare = "unpaired")
 
 head(a$greater[,1:5],20)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Random Testing
+
+
+set.seed(2)
+tT.de.names   <- sample(tT.all.names,1000)
+
+
+
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000, 0.4)
+tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
+tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
+    tT.pathways.clean$`causal Disturbance`))
+    ,method = "fdr")
+tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
+                                                (tT.pathways.clean$P_ORA)),method = "fdr")
+
+hist(as.numeric(as.character(tT.pathways.clean$`causal Disturbance`)))
+
+tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
+tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
+
+head(tT.pathways.clean[order(tT.pathways.clean$ORAFDR),],20)
+
+
+
 
 
 
