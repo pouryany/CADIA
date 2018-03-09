@@ -46,7 +46,7 @@ tT <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
 
 tT.filter  <- tT[!is.na(tT$Gene.ID),]
 tT.filter  <- tT.filter[!duplicated(tT.filter$Gene.ID),]
-tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.001, ]
+tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.05, ]
 tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
 tT.deGenes
 
@@ -55,14 +55,14 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 20000, 0.4)
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 50000, 0.4)
 tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` ==0,]
 tT.pathways[is.na(tT.pathways$`disturbance index`),]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")
 tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
-                                                (tT.pathways.clean$P_ORA)),method = "fdr")
+                                (tT.pathways.clean$P_ORA)),method = "fdr")
 
 
 tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
@@ -79,8 +79,8 @@ tT.pathways.clean$KEGGID <- str_sub(rownames(tT.pathways.clean), end = -5)
 
 rownames(tT.pathways.clean) <- NULL
 
-Hodgkins.cdist  <- tT.pathways.clean[tT.pathways.clean$CDIST < 0.1,]
-Hodgkins.ora    <- tT.pathways.clean[tT.pathways.clean$ORAFDR <0.1,]
+Hodgkins.cdist  <- tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
+Hodgkins.ora    <- tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
 sapply(Hodgkins.cdist, mode)
 
 
@@ -124,7 +124,7 @@ resSPIA.report <- resSPIA[order(resSPIA$pGFdr),c(1,2,9)]
 resSPIA.report[,3] <- mapply(formatC,resSPIA.report[,3],
                              MoreArgs = list(format = "e", digits = 2))
 
-resSPIA.report <- resSPIA.report[as.numeric(resSPIA.report$pGFdr) <0.1,]
+resSPIA.report <- resSPIA.report[as.numeric(resSPIA.report$pGFdr) <0.05,]
 print(xtable(resSPIA.report), include.rownames = FALSE)
 
 
@@ -178,23 +178,35 @@ head(a$greater[,1:5],20)
 #Random Testing
 
 
-set.seed(7)
-tT.de.names   <- sample(tT.all.names,300)
+
+err.samples.ora <- data_frame()
+err.samples.cdist <- data_frame()
+for(i in 1:50){
 
 
+for(j in 1:10){
+tT.de.names   <- sample(tT.all.names,i*100)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 20000, 0.4)
-tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
+
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 2000, 0.4)
+tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")
 tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
                                                 (tT.pathways.clean$P_ORA)),method = "fdr")
 
-hist(as.numeric(as.character(tT.pathways.clean$`causal Disturbance`)))
+#hist(as.numeric(as.character(tT.pathways.clean$`causal Disturbance`)))
 
-tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
-tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
+err.samples.cdist[j,i] <- nrow(tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,])
+err.samples.ora[j,i]   <- nrow(tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,])
+}
+
+}
+
+
+write.csv(err.samples.cdist, file = "err_cdist")
+write.csv(err.samples.cdist, file = "err_ora")
 
 head(tT.pathways.clean[order(tT.pathways.clean$ORAFDR),],20)
 

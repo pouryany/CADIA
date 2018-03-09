@@ -17,7 +17,7 @@ gset <- gset[[idx]]
 fvarLabels(gset) <- make.names(fvarLabels(gset))
 
 # group names for all samples
-gsms <- "0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X0X1X1X1X1X1X"
+gsms <- "01010101010101010101010101010101010101010101010101010101XXXXXXXXXX"
 sml <- c()
 for (i in 1:nchar(gsms)) { sml[i] <- substr(gsms,i,i) }
 
@@ -60,7 +60,7 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 50000, 0.4)
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 5000, 0.4)
 tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` ==0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
@@ -69,8 +69,8 @@ tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
                                                 (tT.pathways.clean$P_ORA)),method = "fdr")
 
 
-tT.pathways.clean[tT.pathways.clean$CDIST < 0.01,]
-tT.pathways.clean[tT.pathways.clean$ORAFDR <0.01,]
+tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
+tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
 
 head(tT.pathways.clean[order(tT.pathways.clean$ORAFDR),],20)
 

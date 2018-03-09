@@ -1,5 +1,5 @@
 # Version info: R 3.2.3, Biobase 2.30.0, GEOquery 2.40.0, limma 3.26.8
-# R scripts generated  Wed Feb 21 13:55:24 EST 2018
+# R scripts generated  Tue Mar 6 21:55:12 EST 2018
 
 ################################################################
 #   Differential expression analysis with limma
@@ -46,8 +46,8 @@ tT <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
 
 tT.filter  <- tT[!is.na(tT$Gene.ID),]
 tT.filter  <- tT.filter[!duplicated(tT.filter$Gene.ID),]
-tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.05, ]
-tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >2,]
+tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.005, ]
+tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
 tT.deGenes
 
 tT.all.names <- as.vector(tT.filter$Gene.ID)
@@ -55,8 +55,8 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000, 0.5)
-tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000, 0.4)
+tT.pathways.clean<- tT.pathways#[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")

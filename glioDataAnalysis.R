@@ -55,12 +55,12 @@ cont.matrix <- makeContrasts("OGvsN" = "G3-G0","GliovsN"= "G2-G0", "AstrovsN" = 
                              "AllGliovsN" = (G3 +G2 + G1)/3 -G0, levels=design)
 fit2 <- contrasts.fit(fit, cont.matrix)
 fit2 <- eBayes(fit2, 0.01)
-tT <- topTable(fit2,coef ="GliovsN" , adjust="BH", sort.by="B", number=Inf)
+tT <- topTable(fit2,coef ="AllGliovsN" , adjust="BH", sort.by="B", number=Inf)
 
 
 tT.filter  <- tT[!is.na(tT$Gene.ID),]
 tT.filter  <- tT.filter[!duplicated(tT.filter$Gene.ID),]
-tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.0001, ]
+tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.05, ]
 tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >2,]
 tT.deGenes
 
@@ -69,8 +69,8 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 20000,0.4)
-tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 5000,0.4)
+tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
                                     tT.pathways.clean$`causal Disturbance`))
                                     ,method = "fdr")

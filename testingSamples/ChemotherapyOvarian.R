@@ -47,7 +47,7 @@ tT <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
 tT.filter  <- tT[!is.na(tT$Gene.ID),]
 tT.filter  <- tT.filter[!duplicated(tT.filter$Gene.ID),]
 tT.deGenes <- tT.filter[tT.filter$P.Value < 0.05, ]
-tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
+tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >2,]
 tT.deGenes
 
 tT.all.names <- as.vector(tT.filter$Gene.ID)
