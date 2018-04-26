@@ -9,27 +9,33 @@
 #' @param iter the number of iterations for causal disturbance
 #'
 #'
+#' @importFrom KEGGgraph    translateGeneID2KEGGID
 #'
 #'
 
-processPathway <- function(pGraph,Name, deKIDs, allKIDs, keggRef, iter,alpha) {
+processPathway <- function(pGraph,Name, deIDs, allIDs, iter,
+                           alpha,statEval) {
+
+    deKIDs   <- KEGGgraph::translateGeneID2KEGGID(deIDs)
+    allKIDs  <- KEGGgraph::translateGeneID2KEGGID(allIDs)
 
     tempNodes   <- nodes(pGraph) %in% allKIDs
     nodeNums    <- nodes(pGraph)[tempNodes]
     isDiffExp   <- nodes(pGraph) %in% deKIDs
     isDiff      <- sum(isDiffExp)
-    deSize      <- length(deKIDs)
-    allSize     <- length(allKIDs)
+    deSize      <- length(deIDs)
+    allSize     <- length(allIDs)
+    #deSize      <- length(deKIDs)
+    #allSize     <- length(allKIDs)
     totPath     <- sum(tempNodes)
 
 
 
     fTestRes        <- stats::phyper(isDiff - 1, totPath, allSize - totPath,
                                      deSize, lower.tail = F)
-    disturbProb     <- pathSampler.newPath(pGraph, iter, deKIDs, allKIDs,alpha)
-    # sampledGraphs   <- pathSampler(pGraph, iter, deKIDs, allKIDs)
-    # sampleDist      <- stats::ecdf(unlist(sampledGraphs[1]))
-    # disturbProb     <- 1 - sampleDist(unlist(sampledGraphs[2]))
+    disturbProb     <- pathSampler.newPath(pGraph, iter, deKIDs, allKIDs,
+                                           alpha,statEval)
+
     if(is.na(disturbProb)){
         causalDist <- fTestRes
     }else{

@@ -1,25 +1,28 @@
+# Version info: R 3.2.3, Biobase 2.30.0, GEOquery 2.40.0, limma 3.26.8
+# R scripts generated  Mon Mar 19 09:24:25 EDT 2018
+
+################################################################
+#   Differential expression analysis with limma
 library(Biobase)
 library(GEOquery)
 library(limma)
 
 # load series and platform data from GEO
 
-gset <- getGEO("GSE4122", GSEMatrix =TRUE, AnnotGPL=TRUE)
-if (length(gset) > 1) idx <- grep("GPL201", attr(gset, "names")) else idx <- 1
+gset <- getGEO("GSE21510", GSEMatrix =TRUE, AnnotGPL=TRUE)
+if (length(gset) > 1) idx <- grep("GPL570", attr(gset, "names")) else idx <- 1
 gset <- gset[[idx]]
 
 # make proper column names to match toptable
 fvarLabels(gset) <- make.names(fvarLabels(gset))
 
 # group names for all samples
-gsms <- "2222221202X21120210202101112010101201201011222X022022222120X2212122"
+gsms <- paste0("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+               "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+               "XXXX00000000000000000000000001111111111111111111")
 sml <- c()
 for (i in 1:nchar(gsms)) { sml[i] <- substr(gsms,i,i) }
 
-# eliminate samples marked as "X"
-sel <- which(sml != "X")
-sml <- sml[sel]
-gset <- gset[ ,sel]
 
 # log2 transform
 ex <- exprs(gset)
@@ -37,21 +40,29 @@ gset$description <- fl
 design <- model.matrix(~ description + 0, gset)
 colnames(design) <- levels(fl)
 fit <- lmFit(gset, design)
-cont.matrix <- makeContrasts(MvsN = "G2-G0", G1-G0,MvsB = "G2-G1",
-                             MvsAll ="G2-(G1+G0)/2", levels=design)
+cont.matrix <- makeContrasts(G1-G0, levels=design)
 fit2 <- contrasts.fit(fit, cont.matrix)
 fit2 <- eBayes(fit2, 0.01)
-tT <- topTable(fit2, coef="MvsN", adjust="BH", sort.by="B", number=Inf)
 
-#vennDiagram(decideTests(fit2))
+
+
+
+
+
+
+
+
+
+
+tT <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
+
 
 
 tT.filter  <- tT[!is.na(tT$Gene.ID),]
 tT.filter  <- tT.filter[!duplicated(tT.filter$Gene.ID),]
-tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.05, ]
+tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.005, ]
 tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
 tT.deGenes
-
 
 tT.all.names <- as.vector(tT.filter$Gene.ID)
 tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
@@ -59,8 +70,11 @@ deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
 tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
-                                 alpha = 0.1 , statEval = 1)
-tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` !=0,]
+                                 alpha = 0.1,statEval = 1)
+tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` ==0,]
+tT.pathways[is.na(tT.pathways$`disturbance index`),]
+tT.pathways.clean <- tT.pathways[!is.na(tT.pathways$`disturbance index`),]
+
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")
@@ -68,51 +82,50 @@ tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
                                                 (tT.pathways.clean$P_ORA)),method = "fdr")
 
 
-
-tT.pathways.clean[tT.pathways.clean$CDIST <0.05,]
+tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
 tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
 
 
 
 
-#Exporting results
 
-library(stringr)
+#exporting results
 
 tT.pathways.clean$KEGGID <- str_sub(rownames(tT.pathways.clean), end = -5)
 
 rownames(tT.pathways.clean) <- NULL
 
-microOC.cdist  <- tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
-microOC.ora    <- tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
-sapply(microOC.cdist, mode)
+Hodgkins.cdist  <- tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
+Hodgkins.ora    <- tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
+sapply(Hodgkins.cdist, mode)
 
 
-microOC.cdist <- microOC.cdist[order(microOC.cdist$CDIST),c(1,10,4,6,8,9)]
-microOC.ora <- microOC.ora[order(microOC.ora$ORAFDR),c(1,10,8,9)]
-microOC.cdist[,c(3,4,5,6)] <- mapply(as.character,microOC.cdist[,c(3,4,5,6)])
-microOC.cdist[,c(3,4,5,6)] <- mapply(as.numeric,microOC.cdist[,c(3,4,5,6)])
+Hodgkins.cdist <- Hodgkins.cdist[order(Hodgkins.cdist$CDIST),c(1,10,4,6,8,9)]
+Hodgkins.ora <- Hodgkins.ora[order(Hodgkins.ora$ORAFDR),c(1,10,8,9)]
+Hodgkins.cdist[,c(3,4,5,6)] <- mapply(as.character,Hodgkins.cdist[,c(3,4,5,6)])
+Hodgkins.cdist[,c(3,4,5,6)] <- mapply(as.numeric,Hodgkins.cdist[,c(3,4,5,6)])
 
-microOC.cdist[,c(3,4,5,6)] <- mapply(formatC,microOC.cdist[,c(3,4,5,6)],
+Hodgkins.cdist[,c(3,4,5,6)] <- mapply(formatC,Hodgkins.cdist[,c(3,4,5,6)],
                                       MoreArgs = list(format = "e", digits = 2))
-microOC.ora[,c(3,4)]   <- mapply(formatC,microOC.ora[,c(3,4)],
+Hodgkins.ora[,c(3,4)]   <- mapply(formatC,Hodgkins.ora[,c(3,4)],
                                   MoreArgs = list(format = "e", digits = 2))
 
-microOC.ora
-microOC.cdist
+Hodgkins.ora
+Hodgkins.cdist
 
 
 library(xtable)
 options(xtable.floating = FALSE)
 options(xtable.timestamp = "")
 
-print(xtable(microOC.cdist), include.rownames = FALSE)
-print(xtable(microOC.ora), include.rownames = FALSE)
+print(xtable(Hodgkins.cdist), include.rownames = FALSE)
+print(xtable(Hodgkins.ora), include.rownames = FALSE)
 
 
 
 
 #SPIA RESULTs
+
 
 library(SPIA)
 deSPIA <- tT.deGenes$logFC

@@ -18,7 +18,7 @@ newpath.centrality <- function(adj.matrix, alpha, beta){
     eye <- diag(nrow(adj.matrix))
     cent.out  <- solve(eye - alpha * adj.matrix)
     cent.in   <- solve(eye - alpha * t(adj.matrix))
-    cent.tot  <- cent.out + beta * cent.in
+    cent.tot  <- (cent.out) + beta * (cent.in)
     return(cent.tot)
 
 }

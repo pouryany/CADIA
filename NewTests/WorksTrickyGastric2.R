@@ -1,5 +1,5 @@
 # Version info: R 3.2.3, Biobase 2.30.0, GEOquery 2.40.0, limma 3.26.8
-# R scripts generated  Wed Feb 21 13:18:35 EST 2018
+# R scripts generated  Sun Mar 25 01:33:26 EDT 2018
 
 ################################################################
 #   Differential expression analysis with limma
@@ -9,15 +9,17 @@ library(limma)
 
 # load series and platform data from GEO
 
-gset <- getGEO("GSE22529", GSEMatrix =TRUE, AnnotGPL=TRUE)
-if (length(gset) > 1) idx <- grep("GPL96", attr(gset, "names")) else idx <- 1
+gset <- getGEO("GSE54129", GSEMatrix =TRUE, AnnotGPL=TRUE)
+if (length(gset) > 1) idx <- grep("GPL570", attr(gset, "names")) else idx <- 1
 gset <- gset[[idx]]
 
 # make proper column names to match toptable
 fvarLabels(gset) <- make.names(fvarLabels(gset))
 
 # group names for all samples
-gsms <- "0010001000100010100010000000000001000000010100000011"
+gsms <- paste0("11111111111111111111100000000000000000000000000000",
+               "00000000000000000000000000000000000000000000000000",
+               "00000000000000000000000000000000")
 sml <- c()
 for (i in 1:nchar(gsms)) { sml[i] <- substr(gsms,i,i) }
 
@@ -34,6 +36,7 @@ exprs(gset) <- log2(ex) }
 sml <- paste("G", sml, sep="")    # set group names
 fl <- as.factor(sml)
 gset$description <- fl
+
 design <- model.matrix(~ description + 0, gset)
 colnames(design) <- levels(fl)
 fit <- lmFit(gset, design)
@@ -47,7 +50,7 @@ tT <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
 tT.filter  <- tT[!is.na(tT$Gene.ID),]
 tT.filter  <- tT.filter[!duplicated(tT.filter$Gene.ID),]
 tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.05, ]
-tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
+tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >3,]
 tT.deGenes
 
 tT.all.names <- as.vector(tT.filter$Gene.ID)
@@ -57,18 +60,21 @@ allKID   <- translateGeneID2KEGGID(tT.all.names)
 
 tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
                                  alpha = 0.1 , statEval = 1)
-tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
+tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")
 tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
-                                                (tT.pathways.clean$P_ORA)),method = "fdr")
+                                        (tT.pathways.clean$P_ORA)),method = "fdr")
 
 
-tT.pathways.clean[tT.pathways.clean$CDIST < 0.1,]
-tT.pathways.clean[tT.pathways.clean$ORAFDR <0.1,]
+tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
+tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
 
-head(tT.pathways.clean[order(tT.pathways.clean$ORAFDR),],20)
+head(tT.pathways.clean[order(tT.pathways.clean$CDIST),],30)
+
+
+
 
 
 
@@ -79,8 +85,8 @@ tT.pathways.clean$KEGGID <- str_sub(rownames(tT.pathways.clean), end = -5)
 
 rownames(tT.pathways.clean) <- NULL
 
-Hodgkins.cdist  <- tT.pathways.clean[tT.pathways.clean$CDIST < 0.1,]
-Hodgkins.ora    <- tT.pathways.clean[tT.pathways.clean$ORAFDR <0.1,]
+Hodgkins.cdist  <- tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
+Hodgkins.ora    <- tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
 sapply(Hodgkins.cdist, mode)
 
 
@@ -110,6 +116,8 @@ print(xtable(Hodgkins.ora), include.rownames = FALSE)
 
 #SPIA RESULTs
 
+
+library(SPIA)
 deSPIA <- tT.deGenes$logFC
 names(deSPIA)<- tT.deGenes$Gene.ID
 allSPIA <- tT.filter$Gene.ID
@@ -124,7 +132,7 @@ resSPIA.report <- resSPIA[order(resSPIA$pGFdr),c(1,2,9)]
 resSPIA.report[,3] <- mapply(formatC,resSPIA.report[,3],
                              MoreArgs = list(format = "e", digits = 2))
 
-resSPIA.report <- resSPIA.report[as.numeric(resSPIA.report$pGFdr) <0.1,]
+resSPIA.report <- resSPIA.report[as.numeric(resSPIA.report$pGFdr) <0.05,]
 print(xtable(resSPIA.report), include.rownames = FALSE)
 
 
@@ -133,6 +141,9 @@ print(xtable(resSPIA.report), include.rownames = FALSE)
 
 
 
+
+
+library(stringr)
 library(gage)
 data("kegg.gs")
 kg.hsa=kegg.gsets("hsa")
@@ -153,14 +164,33 @@ head(expdata.clean)
 tmp1 <- tT.filter[rownames(expdata.clean),]
 rownames(expdata.clean) <- tmp1$Gene.ID
 rownames(expdata.clean) <-
-nsample <- grep("G0", fl)
+    nsample <- grep("G0", fl)
 csample <- grep("G1", fl)
 
 
 a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
-          compare = "unpaired")
+          compare = "unpaired",saaTest = gs.KSTest)
 
 head(a$greater[,1:5],20)
+
+
+
+
+
+
+
+tT.filter$Gene.ID
+
+log.fc <- tT.filter$logFC
+class(as.vector(log.fc))
+names(log.fc) <- tT.filter$Gene.ID
+class(log.fc)
+
+a <- gage(log.fc, gsets = p.kegg.gsets, ref = NULL, sample = NULL)
+tT.filter
+
+head(a$greater[,1:5],40)
+
 
 
 
@@ -178,25 +208,70 @@ head(a$greater[,1:5],20)
 #Random Testing
 
 
-set.seed(2)
-tT.de.names   <- sample(tT.all.names,1000)
+
+err.samples.ora <- data_frame()
+err.samples.cdist <- data_frame()
+for(i in 1:50){
 
 
+    for(j in 1:10){
+        tT.de.names   <- sample(tT.all.names,i*100)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000, 0.4)
-tT.pathways.clean<- tT.pathways[tT.pathways$`disturbance index` !=0,]
-tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
-    tT.pathways.clean$`causal Disturbance`))
-    ,method = "fdr")
-tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
-                                                (tT.pathways.clean$P_ORA)),method = "fdr")
 
-hist(as.numeric(as.character(tT.pathways.clean$`causal Disturbance`)))
+        tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 2000, 0.4)
+        tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` !=0,]
+        tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
+            tT.pathways.clean$`causal Disturbance`))
+            ,method = "fdr")
+        tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
+                                                        (tT.pathways.clean$P_ORA)),method = "fdr")
 
-tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
-tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
+        #hist(as.numeric(as.character(tT.pathways.clean$`causal Disturbance`)))
+
+        err.samples.cdist[j,i] <- nrow(tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,])
+        err.samples.ora[j,i]   <- nrow(tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,])
+    }
+
+}
+
+err.cdist <- t(err.samples.cdist)
+err.cdist <- as.data.frame(err.cdist)
+err.cdist$av.err <- rowMeans(err.cdist) /148
+tail(t(err.samples.ora))
+
+err.ora <- t(err.samples.ora)
+err.ora <- as.data.frame(err.ora)
+err.ora$av.err <- rowMeans(err.ora) / 148
+
+plot(err.ora$av.err, col ="#e41a1c",cex =1.9,pch = "o",
+     xlab="Size of sample set (x100)" , ylab="ratio of false positives",cex.lab=1.8)
+#par(new=TRUE)
+points(err.cdist$av.err,cex =1.5,col ="#00441b",pch = 15)
+legend(x = 0, y = 0.002, legend = c("ORA", "CDIST"),
+       col= c("#e41a1c","#00441b"), cex = 2, pch = c(15,15))
+
+
+write.csv(err.samples.cdist, file = "err_cdist")
+write.csv(err.samples.cdist, file = "err_ora")
 
 head(tT.pathways.clean[order(tT.pathways.clean$ORAFDR),],20)
+
+gg  <- pathways.collection[["04144.xml"]]
+cgg <- connectedComp(gg)
+subgg <- unique(unlist(cgg[which((lapply(cgg, length)) != 1)]))
+sgg <- subGraph(subgg,gg)
+# Testing the stability of  newpath Centrality
+
+testGraph <- pathways.collection[["05219.xml"]]
+testGraph.adj <- as(testGraph, "matrix")
+
+
+
+
+cent.matrix <- PathwayDisturbance::newpath.centrality(testGraph.adj,alpha = 0.5, beta = 0.5)
+
+
+
 
 
 

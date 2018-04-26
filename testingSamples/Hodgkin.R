@@ -54,15 +54,22 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 50000, 0.4)
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
+                                 alpha = 0.1 , statEval = 1)
 tT.pathways.clean <-tT.pathways
 #tT.pathways.clean <- tT.pathways[tT.pathways$`disturbance index` !=0,]
+tT.pathways[is.na(tT.pathways$`disturbance index`),]
+
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")
 tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
                                                 (tT.pathways.clean$P_ORA)),method = "fdr")
 
+
+
+tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
+tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
 
 
 head(tT.pathways.clean)

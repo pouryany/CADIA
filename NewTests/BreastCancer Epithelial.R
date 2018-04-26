@@ -1,5 +1,5 @@
 # Version info: R 3.2.3, Biobase 2.30.0, GEOquery 2.40.0, limma 3.26.8
-# R scripts generated  Wed Feb 21 19:00:19 EST 2018
+# R scripts generated  Sun Mar 11 21:48:41 EDT 2018
 
 ################################################################
 #   Differential expression analysis with limma
@@ -9,17 +9,22 @@ library(limma)
 
 # load series and platform data from GEO
 
-gset <- getGEO("GSE6344", GSEMatrix =TRUE, AnnotGPL=TRUE)
-if (length(gset) > 1) idx <- grep("GPL96", attr(gset, "names")) else idx <- 1
+gset <- getGEO("GSE10797", GSEMatrix =TRUE, AnnotGPL=TRUE)
+if (length(gset) > 1) idx <- grep("GPL571", attr(gset, "names")) else idx <- 1
 gset <- gset[[idx]]
 
 # make proper column names to match toptable
 fvarLabels(gset) <- make.names(fvarLabels(gset))
 
 # group names for all samples
-gsms <- "10101010100110101010"
+gsms <- "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX1010101010"
 sml <- c()
 for (i in 1:nchar(gsms)) { sml[i] <- substr(gsms,i,i) }
+
+# eliminate samples marked as "X"
+sel <- which(sml != "X")
+sml <- sml[sel]
+gset <- gset[ ,sel]
 
 # log2 transform
 ex <- exprs(gset)
@@ -40,14 +45,18 @@ fit <- lmFit(gset, design)
 cont.matrix <- makeContrasts(G1-G0, levels=design)
 fit2 <- contrasts.fit(fit, cont.matrix)
 fit2 <- eBayes(fit2, 0.01)
+
+
+
+
 tT <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
 
 
 
 tT.filter  <- tT[!is.na(tT$Gene.ID),]
 tT.filter  <- tT.filter[!duplicated(tT.filter$Gene.ID),]
-tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.001, ]
-tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >2,]
+tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.005, ]
+tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
 tT.deGenes
 
 tT.all.names <- as.vector(tT.filter$Gene.ID)
@@ -56,8 +65,9 @@ deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
 tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
-                                 alpha = 0.1 , statEval = 1)
-tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` !=0,]
+                                 alpha = 0.1,statEval = 1)
+tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` ==0,]
+tT.pathways[is.na(tT.pathways$`disturbance index`),]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")
@@ -67,6 +77,3 @@ tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
 
 tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
 tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
-
-head(tT.pathways.clean[order(tT.pathways.clean$CDIST),],10)
-

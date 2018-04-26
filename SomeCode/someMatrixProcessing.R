@@ -4,6 +4,8 @@ mtx.collection <-sapply(pathways.collection, function(X)(as(X,"matrix")))
 
 eigen.collection <- lapply(mtx.collection, eigen, only.value = T )
 
+
+
 sapply(eigen.collection,function (X)(max(X["values"])))
 a <- eigen.collection[[1]]
 
@@ -19,8 +21,8 @@ c <-  b %>% unlist()  %>% Im() == 0
 c %>% subset.default(x = b,) %>% Re() %>% max()
 }
 
-max(sapply(eigen.collection,function(X)(largest.eigen(unlist(X)))))
-
+d <- sapply(eigen.collection,function(X)(largest.eigen(unlist(X))))
+hist(1/d)
 bugbug <- unlist(pathways.collection[["04070.xml"]])
 bugbug
 library(RBGL)
