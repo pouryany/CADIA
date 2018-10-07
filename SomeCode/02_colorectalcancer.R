@@ -64,6 +64,12 @@ tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.005, ]
 tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
 tT.deGenes
 
+
+# Saving the list of Differentially expressed genes
+write.table(unlist(tT.deGenes$Gene.ID), "Colorectad_tTDEG", col.names = F,
+            row.names = F)
+
+
 tT.all.names <- as.vector(tT.filter$Gene.ID)
 tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
@@ -183,7 +189,7 @@ csample <- grep("G1", fl)
 
 
 a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
-          compare = "as.group",same.dir = T, rank.test = F)
+          compare = "as.group",same.dir = T, rank.test = F, saaTest = gs.KSTest)
 
 head(a$greater[,1:5],20)
 
@@ -210,7 +216,7 @@ fgseaRes <- fgsea(pathways = p.kegg.gsets,
                   maxSize=500,
                   nperm=10000)
 
-fgseaRes[pval < 0.05,]
+fgseaRes[padj < 0.05,]
 
 head(exprs.gage)
 ?gagePrep

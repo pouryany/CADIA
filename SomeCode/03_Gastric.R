@@ -1,5 +1,5 @@
 # Version info: R 3.2.3, Biobase 2.30.0, GEOquery 2.40.0, limma 3.26.8
-# R scripts generated  Mon Mar 19 09:24:25 EDT 2018
+# R scripts generated  Sun Mar 25 01:33:26 EDT 2018
 
 ################################################################
 #   Differential expression analysis with limma
@@ -9,7 +9,7 @@ library(limma)
 
 # load series and platform data from GEO
 
-gset <- getGEO("GSE21510", GSEMatrix =TRUE, AnnotGPL=TRUE)
+gset <- getGEO("GSE54129", GSEMatrix =TRUE, AnnotGPL=TRUE)
 if (length(gset) > 1) idx <- grep("GPL570", attr(gset, "names")) else idx <- 1
 gset <- gset[[idx]]
 
@@ -17,12 +17,11 @@ gset <- gset[[idx]]
 fvarLabels(gset) <- make.names(fvarLabels(gset))
 
 # group names for all samples
-gsms <- paste0("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-               "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-               "XXXX00000000000000000000000001111111111111111111")
+gsms <- paste0("11111111111111111111100000000000000000000000000000",
+               "00000000000000000000000000000000000000000000000000",
+               "00000000000000000000000000000000")
 sml <- c()
 for (i in 1:nchar(gsms)) { sml[i] <- substr(gsms,i,i) }
-
 
 # log2 transform
 ex <- exprs(gset)
@@ -37,55 +36,52 @@ exprs(gset) <- log2(ex) }
 sml <- paste("G", sml, sep="")    # set group names
 fl <- as.factor(sml)
 gset$description <- fl
+
 design <- model.matrix(~ description + 0, gset)
 colnames(design) <- levels(fl)
 fit <- lmFit(gset, design)
 cont.matrix <- makeContrasts(G1-G0, levels=design)
 fit2 <- contrasts.fit(fit, cont.matrix)
 fit2 <- eBayes(fit2, 0.01)
-
-
-
-
-
-
-
-
-
-
-
 tT <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
 
 
 
 tT.filter  <- tT[!is.na(tT$Gene.ID),]
 tT.filter  <- tT.filter[!duplicated(tT.filter$Gene.ID),]
-tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.005, ]
-tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
+tT.deGenes <- tT.filter[tT.filter$adj.P.Val < 0.05, ]
+tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >3,]
 tT.deGenes
+
+
+# Saving the list of Differentially expressed genes
+write.table(unlist(tT.deGenes$Gene.ID), "Gastric_tTDEG", col.names = F,
+            row.names = F)
 
 tT.all.names <- as.vector(tT.filter$Gene.ID)
 tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID    <- translateGeneID2KEGGID(tT.de.names)
 allKID   <- translateGeneID2KEGGID(tT.all.names)
 
-
 set.seed(1)
 tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
-                                 alpha = 0.1,statEval = 1)
-tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` ==0,]
-tT.pathways[is.na(tT.pathways$`disturbance index`),]
-tT.pathways.clean <- tT.pathways[!is.na(tT.pathways$`disturbance index`),]
-
+                                 alpha = 0.1 , statEval = 1)
+tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` !=0,]
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
     tT.pathways.clean$`causal Disturbance`))
     ,method = "fdr")
 tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
-                                                (tT.pathways.clean$P_ORA)),method = "fdr")
+                                        (tT.pathways.clean$P_ORA)),method = "fdr")
+
+
 
 
 tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
 tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
+
+head(tT.pathways.clean[order(tT.pathways.clean$CDIST),],30)
+
+
 
 
 
@@ -149,6 +145,11 @@ print(xtable(resSPIA.report), include.rownames = FALSE)
 
 
 
+
+
+
+
+
 ### Processing for Gene Set Enrichment analysis.
 
 
@@ -183,7 +184,7 @@ csample <- grep("G1", fl)
 
 
 a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
-          compare = "as.group",same.dir = T, rank.test = F)
+          compare = "unpaired")
 
 head(a$greater[,1:5],20)
 
@@ -210,7 +211,7 @@ fgseaRes <- fgsea(pathways = p.kegg.gsets,
                   maxSize=500,
                   nperm=10000)
 
-fgseaRes[pval < 0.05,]
+fgseaRes[padj < 0.05,]
 
 head(exprs.gage)
 ?gagePrep
@@ -229,6 +230,87 @@ head(a$greater[,1:5],40)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Random Testing
+
+
+
+err.samples.ora <- data_frame()
+err.samples.cdist <- data_frame()
+for(i in 1:50){
+
+
+    for(j in 1:10){
+        tT.de.names   <- sample(tT.all.names,i*100)
+
+
+        tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 2000, 0.4)
+        tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` !=0,]
+        tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
+            tT.pathways.clean$`causal Disturbance`))
+            ,method = "fdr")
+        tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
+                                                        (tT.pathways.clean$P_ORA)),method = "fdr")
+
+        #hist(as.numeric(as.character(tT.pathways.clean$`causal Disturbance`)))
+
+        err.samples.cdist[j,i] <- nrow(tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,])
+        err.samples.ora[j,i]   <- nrow(tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,])
+    }
+
+}
+
+err.cdist <- t(err.samples.cdist)
+err.cdist <- as.data.frame(err.cdist)
+err.cdist$av.err <- rowMeans(err.cdist) /148
+tail(t(err.samples.ora))
+
+err.ora <- t(err.samples.ora)
+err.ora <- as.data.frame(err.ora)
+err.ora$av.err <- rowMeans(err.ora) / 148
+
+plot(err.ora$av.err, col ="#e41a1c",cex =1.9,pch = "o",
+     xlab="Size of sample set (x100)" , ylab="ratio of false positives",cex.lab=1.8)
+#par(new=TRUE)
+points(err.cdist$av.err,cex =1.5,col ="#00441b",pch = 15)
+legend(x = 0, y = 0.002, legend = c("ORA", "CDIST"),
+       col= c("#e41a1c","#00441b"), cex = 2, pch = c(15,15))
+
+
+write.csv(err.samples.cdist, file = "err_cdist")
+write.csv(err.samples.cdist, file = "err_ora")
+
+head(tT.pathways.clean[order(tT.pathways.clean$ORAFDR),],20)
+
+gg  <- pathways.collection[["04144.xml"]]
+cgg <- connectedComp(gg)
+subgg <- unique(unlist(cgg[which((lapply(cgg, length)) != 1)]))
+sgg <- subGraph(subgg,gg)
+# Testing the stability of  newpath Centrality
+
+testGraph <- pathways.collection[["05219.xml"]]
+testGraph.adj <- as(testGraph, "matrix")
+
+
+
+
+cent.matrix <- PathwayDisturbance::newpath.centrality(testGraph.adj,alpha = 0.5, beta = 0.5)
 
 
 
