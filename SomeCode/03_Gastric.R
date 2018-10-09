@@ -183,16 +183,34 @@ nsample <- grep("G0", fl)
 csample <- grep("G1", fl)
 
 
-a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
-          compare = "unpaired")
-
-head(a$greater[,1:5],20)
-
+gsea.Res   <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample,
+                   sample = csample, compare = "as.group",same.dir = F,
+                   rank.test = F)
 
 
 
-library(devtools)
-install_github("ctlab/fgsea")
+gsea.great <- data.frame(gsea.Res$greater)
+gsea.great <- tibble::rownames_to_column(gsea.great,"Name")
+gsea.great <- select(gsea.great, c("Name","p.val","q.val"))
+gsea.great <- dplyr::inner_join(gsea.great,
+                                tT.pathways.clean[,c("Name","KEGGID")],
+                                by = "Name")
+
+gsea.great %<>% mutate(.,ID = KEGGID) %>%
+    select(.,c("Name","ID","p.val","q.val" )) %>%
+    filter(.,q.val < 0.05)
+
+
+
+gsea.great.rep          <- gsea.great
+gsea.great.rep[,c(3,4)] <- mapply(formatC,gsea.great.rep[,c(3,4)],
+                                  MoreArgs = list(format = "e", digits = 2))
+
+nrow(gsea.great.rep)
+print(xtable(gsea.great.rep), include.rownames = FALSE)
+
+#library(devtools)
+#install_github("ctlab/fgsea")
 
 
 
@@ -202,34 +220,34 @@ library(ggplot2)
 deg.values <- tT.filter$logFC
 names(deg.values) <-  tT.filter$Gene.ID
 
-aaa <- data(examplePathways)
-bbb <- data(exampleRanks)
-
 fgseaRes <- fgsea(pathways = p.kegg.gsets,
                   stats = deg.values,
                   minSize=15,
                   maxSize=500,
                   nperm=10000)
 
-fgseaRes[padj < 0.05,]
-
-head(exprs.gage)
-?gagePrep
-
-tT.filter$Gene.ID
-
-log.fc <- tT.filter$logFC
-class(as.vector(log.fc))
-names(log.fc) <- tT.filter$Gene.ID
-class(log.fc)
-
-a <- gage(log.fc, gsets = p.kegg.gsets, ref = NULL, sample = NULL)
-tT.filter
-
-head(a$greater[,1:5],40)
+fgseaRes[padj < 0.1,]
 
 
 
+fgseaRes   <- as_data_frame(fgseaRes)
+fgseaRes   <- select(fgseaRes, c("pathway","pval","padj"))
+fgseaRes   <- dplyr::inner_join(fgseaRes,
+                                tT.pathways.clean[,c("Name","KEGGID")],
+                                by = c("pathway" = "Name"))
+
+fgseaRes   %<>% mutate(.,ID = KEGGID) %>%
+    select(.,c("pathway","ID","pval","padj" )) %>%
+    filter(.,padj < 0.05)
+
+
+
+fgseaRes.rep          <- fgseaRes
+fgseaRes.rep[,c(3,4)] <- mapply(formatC,fgseaRes[,c(3,4)],
+                                MoreArgs = list(format = "e", digits = 2))
+
+nrow(fgseaRes.rep)
+print(xtable(fgseaRes.rep), include.rownames = FALSE)
 
 
 

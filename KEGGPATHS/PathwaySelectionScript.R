@@ -92,7 +92,7 @@ a <- as.data.frame(pathways.summary)
 # Few filtering lines
 b <- rownames(a[(a$pathways.edgeInfo < 0.2 * a$pathways.nodeInfo),])
 c <- rownames(a[(a$pathways.edgeInfo < 20),])
-d <- rownames(a[(a$pathways.isolated > 0.7 * a$pathways.nodeInfo),])
+d <- rownames(a[(a$pathways.isolated > 0.5 * a$pathways.nodeInfo),])
 e <- rownames(a[a$pathways.compInfo < 10,])
 f <- Reduce(union, list(b,c,d,e))
 length(f)
@@ -136,10 +136,45 @@ length(pathways.collection.names)
 # 30 pathways were removed because of the connected component
 # Commands for updating data in the package.
 
-load(file = "pathwaysData")
-load(file = "pathwayDataNames")
-devtools::use_data(pathways.collection,overwrite = T)
-devtools::use_data(pathways.collection.names, overwrite = T)
+#load(file = "pathwaysData")
+#load(file = "pathwayDataNames")
+#devtools::use_data(pathways.collection,overwrite = T)
+#devtools::use_data(pathways.collection.names, overwrite = T)
+
+
+
+library(RBGL)
+
+mtx.collection <-sapply(pathways.collection, function(X)(as(X,"matrix")))
+
+eigen.collection <- lapply(mtx.collection, eigen, only.value = T )
+
+
+
+
+library(dplyr)
+
+largest.eigen <- function(b) {
+    c <-  b %>% unlist()  %>% Im() == 0
+    c %>% subset.default(x = b) %>% Re() %>% max()
+}
+
+largest.eigen2 <- function(b) {
+    c <-  b %>% unlist()  %>% Re() %>% max()
+}
+
+
+
+a.test <- unlist(eigen.collection[[148]])
+largest.eigen(unlist(a.test))
+a.test  %>% unlist() %>% Re() %>% max()
+a.test %>% subset.default(x =  unlist(eigen.collection[[148]])) %>% Re() %>% max()
+
+d <- sapply(eigen.collection,function(X)(largest.eigen2(unlist(X))))
+length(d)
+
+pathways.collection.names[names(d[d>=10])]
+
 
 
 

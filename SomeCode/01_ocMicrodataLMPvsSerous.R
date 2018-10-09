@@ -62,13 +62,16 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 deKID        <- translateGeneID2KEGGID(tT.de.names)
 allKID       <- translateGeneID2KEGGID(tT.all.names)
 
-
 # Causal disturbance analysis with CADIA, for parameter descriptions see
 # documentations
+
+library(CADIA)
 
 set.seed(1)
 tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
                                  alpha = 0.1 , statEval = 1)
+
+
 
 library(stringr)
 
@@ -83,10 +86,8 @@ tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
                                         (tT.pathways.clean$P_ORA)),method = "fdr")
 
 
-a <- as.data.frame(as.list(tT.pathways$Name))
-
-tT.pathways.clean[tT.pathways.clean$CDIST < 0.01,]
-tT.pathways.clean[tT.pathways.clean$ORAFDR <0.01,]
+tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
+tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
 
 head(tT.pathways.clean[order(tT.pathways.clean$CDIST),],20)
 
@@ -94,7 +95,7 @@ head(tT.pathways.clean[order(tT.pathways.clean$CDIST),],20)
 
 #The next few lines are for exporting results
 
-tT.pathways.clean$KEGGID <- str_sub(rownames(tT.pathways.clean), end = -5)
+#tT.pathways.clean$KEGGID <- str_sub(tT.pathways.clean$KEGGID, end = -5)
 
 rownames(tT.pathways.clean) <- NULL
 
@@ -163,9 +164,7 @@ print(xtable(resSPIA.report), include.rownames = FALSE)
 ### Processing for Gene Set Enrichment analysis.
 
 
-library(stringr)
 library(gage)
-library(CADIA)
 
 
 # Using Gage library, we define a customized gene set
@@ -175,10 +174,13 @@ kegg.gs=kg.hsa$kg.sets[kg.hsa$sigmet.idx]
 av.paths <- names(kegg.gs)
 av.paths <- str_sub(av.paths, start =10)
 pathways.collection.names[!(pathways.collection.names %in% av.paths)]
-p.kegg.gsets <- lapply(pathways.collection,nodes)
+p.kegg       <- pathways.collection.names %in% tT.pathways.clean$Name
+p.kegg.gsets <- lapply(pathways.collection[p.kegg],nodes)
 p.kegg.gsets <- mapply(str_sub,p.kegg.gsets, MoreArgs = list(start = 5) )
-names(p.kegg.gsets) <- pathways.collection.names
-p.kegg.gsets
+names(p.kegg.gsets) <- pathways.collection.names[p.kegg]
+
+length(pathways.collection[p.kegg])
+length(p.kegg.gsets)
 
 
 expdata <- exprs(gset)
@@ -193,16 +195,52 @@ nsample <- grep("G0", fl)
 csample <- grep("G1", fl)
 
 
-a <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample, sample = csample,
-          compare = "as.group",same.dir = T, rank.test = F)
+gsea.Res   <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample,
+                   sample = csample, compare = "as.group",same.dir = F,
+                   rank.test = F)
 
-head(a$greater[,1:5],20)
+gsea.less  <- data.frame(gsea.Res$less)
+gsea.less  <- tibble::rownames_to_column(gsea.less,"Name")
+gsea.less  <- select(gsea.less, c("Name","p.val","q.val"))
+gsea.less  <- dplyr::inner_join(gsea.less,tT.pathways.clean[,c("Name","KEGGID")],
+                                by = "Name")
+
+gsea.less  %<>% mutate(.,ID = KEGGID) %>%
+                select(.,c("Name","ID","p.val","q.val" )) %>%
+                filter(., p.val < 0.16)
 
 
 
 
-library(devtools)
-install_github("ctlab/fgsea")
+gsea.less.rep          <- gsea.less
+gsea.less.rep[,c(3,4)] <- mapply(formatC,gsea.less.rep[,c(3,4)],
+                           MoreArgs = list(format = "e", digits = 2))
+
+
+print(xtable(gsea.less.rep), include.rownames = FALSE)
+
+gsea.great <- data.frame(gsea.Res$greater)
+gsea.great <- tibble::rownames_to_column(gsea.great,"Name")
+gsea.great <- select(gsea.great, c("Name","p.val","q.val"))
+gsea.great <- dplyr::inner_join(gsea.great,
+                                 tT.pathways.clean[,c("Name","KEGGID")],
+                                 by = "Name")
+
+gsea.great %<>% mutate(.,ID = KEGGID) %>%
+                select(.,c("Name","ID","p.val","q.val" )) %>%
+                filter(.,q.val < 0.1)
+
+
+
+gsea.great.rep          <- gsea.great
+gsea.great.rep[,c(3,4)] <- mapply(formatC,gsea.great.rep[,c(3,4)],
+                                 MoreArgs = list(format = "e", digits = 2))
+
+
+print(xtable(gsea.great.rep), include.rownames = FALSE)
+
+#library(devtools)
+#install_github("ctlab/fgsea")
 
 
 
@@ -212,39 +250,34 @@ library(ggplot2)
 deg.values <- tT.filter$logFC
 names(deg.values) <-  tT.filter$Gene.ID
 
-aaa <- data(examplePathways)
-bbb <- data(exampleRanks)
-
 fgseaRes <- fgsea(pathways = p.kegg.gsets,
                   stats = deg.values,
                   minSize=15,
                   maxSize=500,
                   nperm=10000)
 
-fgseaRes[pval < 0.05,]
-
-head(exprs.gage)
-?gagePrep
-
-tT.filter$Gene.ID
-
-log.fc <- tT.filter$logFC
-class(as.vector(log.fc))
-names(log.fc) <- tT.filter$Gene.ID
-class(log.fc)
-
-a <- gage(log.fc, gsets = p.kegg.gsets, ref = NULL, sample = NULL)
-tT.filter
-
-head(a$greater[,1:5],40)
+fgseaRes[padj < 0.1,]
 
 
 
+fgseaRes   <- as_data_frame(fgseaRes)
+fgseaRes   <- select(fgseaRes, c("pathway","pval","padj"))
+fgseaRes   <- dplyr::inner_join(fgseaRes,
+                                tT.pathways.clean[,c("Name","KEGGID")],
+                                by = c("pathway" = "Name"))
+
+fgseaRes   %<>% mutate(.,ID = KEGGID) %>%
+                select(.,c("pathway","ID","pval","padj" )) %>%
+                filter(.,padj < 0.1)
 
 
 
+fgseaRes.rep          <- fgseaRes
+fgseaRes.rep[,c(3,4)] <- mapply(formatC,fgseaRes[,c(3,4)],
+                                  MoreArgs = list(format = "e", digits = 2))
 
 
+print(xtable(fgseaRes.rep), include.rownames = FALSE)
 
 
 
