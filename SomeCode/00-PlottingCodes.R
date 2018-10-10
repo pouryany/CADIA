@@ -36,22 +36,25 @@ length(cent.vec)
 test.mat   <- matrix(NA, length(cent.vec),10000)
 test.mat2  <- matrix(NA, length(cent.vec),10000)
 beta.array <- seq(0,10,by = 0.001)
+i <- 41
 for (i in 1:10000) {
     mat     <- PathwayDisturbance::newpath.centrality(apop.mat,
                                                       alpha = 0.1,
                                                       beta = beta.array[i])
-    vec     <- rowSums(mat)
-    test.mat[,i]  <- rank(vec, ties.method = "min")
+    vec           <- rowSums(mat)
+    test.mat[,i]  <- vec/(1+beta.array[i])
+    #test.mat[,i]  <- rank(vec, ties.method = "min")
     #test.mat2[,i] <- sample(1:88,replace = F)
 }
 
-
+test.mat[,40] == test.mat[,41]
 
 sink.mat     <- PathwayDisturbance::newpath.centrality(t(apop.mat),
                                                   alpha = 0.1,
                                                   beta = 0)
 sink.vec     <- rowSums(sink.mat)
-sink.rank  <- rank(sink.vec, ties.method = "min")
+sink.rank    <- sink.vec
+#sink.rank  <- rank(sink.vec, ties.method = "min")
 
 
 
@@ -69,20 +72,28 @@ for (i in 2:10000){
    dif.array[i]  <-  sqrt(sum((test.mat[,i] - test.mat[,i-1]) **2))
    dif.array2[i] <-  sqrt(sum((test.mat[,i] - test.mat[,1]) **2))
    dif.array3[i] <-  sqrt(sum((test.mat[,i] - sink.rank) **2)) # + sqrt(sum((test.mat[,i] - test.mat[,1]) **2))
-   dif.array4[i] <-  sqrt(sum((test.mat[,i] - sink.rank) **2))  + sqrt(sum((test.mat[,i] - test.mat[,1]) **2))
+   #dif.array4[i] <-  sqrt(sum((test.mat[,i] - sink.rank) **2))  + sqrt(sum((test.mat[,i] - test.mat[,1]) **2))
+   dif.array4[i] <-  (sum(((test.mat[,i] - sink.rank)**2))) * (sum((test.mat[,i] - test.mat[,1])**2))
    }
 
 dif.array3[982]
+hist(dif.array[300:10000])
 which(dif.array4[2:10000] ==max(dif.array4[2:10000]))
 which(dif.array4[2:10000] > 427.5)
-mean(dif.array[3:10000])
-plot(beta.array[2:10000],dif.array4[2:10000],type = "l")
+mean(dif.array4[3:10000])
+plot(beta.array[4:10000],dif.array4[4:10000],type = "l", xlab = "Beta",
+     ylab = "product of L-2 norms of Source and Sink",cex.lab=1.5)
+abline(v = 1, col="red", lwd=3, lty=2)
+
 lines(beta.array[3:10000],dif.array3[3:10000],type = "l", col = "red")
 #Plotting part
 
 names(cent.vec) <- node.genes
 sort(cent.vec)
 
+
+
+test.mat[,40:46]
 
 #ii      <- cut(cent.vec, breaks = seq(min(cent.vec), max(cent.vec), len =40),
 #          include.lowest = TRUE)

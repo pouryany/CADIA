@@ -84,8 +84,8 @@ tT.pathways[is.na(tT.pathways$`disturbance index`),]
 tT.pathways.clean <- tT.pathways[!is.na(tT.pathways$`disturbance index`),]
 
 tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
-    tT.pathways.clean$`causal Disturbance`))
-    ,method = "fdr")
+                                     tT.pathways.clean$`causal Disturbance`))
+                                     ,method = "fdr")
 tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
                                                 (tT.pathways.clean$P_ORA)),method = "fdr")
 
@@ -233,7 +233,7 @@ fgseaRes <- fgsea(pathways = p.kegg.gsets,
 
 fgseaRes[padj < 0.1,]
 
-
+?fgsea
 
 fgseaRes   <- as_data_frame(fgseaRes)
 fgseaRes   <- select(fgseaRes, c("pathway","pval","padj"))
