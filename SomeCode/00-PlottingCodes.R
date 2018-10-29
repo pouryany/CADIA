@@ -33,10 +33,13 @@ cent.vec     <- rowSums(cent.mat)
 rank(cent.vec, ties.method = "min")
 length(cent.vec)
 
+
+# Testing for beta parameter
+#
+#
 test.mat   <- matrix(NA, length(cent.vec),10000)
 test.mat2  <- matrix(NA, length(cent.vec),10000)
 beta.array <- seq(0,10,by = 0.001)
-i <- 41
 for (i in 1:10000) {
     mat     <- PathwayDisturbance::newpath.centrality(apop.mat,
                                                       alpha = 0.1,
@@ -93,7 +96,62 @@ sort(cent.vec)
 
 
 
-test.mat[,40:46]
+
+# Testing alpha parameter
+#
+#
+#
+#
+#
+test.mat    <- matrix(NA, length(cent.vec),1000)
+test.mat2   <- matrix(NA, length(cent.vec),1000)
+alpha.array <- seq(0,1,by = 0.001)
+for (i in 1:1000) {
+    mat     <- PathwayDisturbance::newpath.centrality(apop.mat,
+                                                      alpha = alpha.array[i],
+                                                      beta = 1)
+    vec           <- rowSums(mat)
+    #test.mat[,i]  <- vec
+    test.mat[,i]  <- rank(vec, ties.method = "average")
+    test.mat2[,i] <- sample(1:88,replace = F)
+}
+
+test.mat[,40] == test.mat[,41]
+
+# sink.mat     <- PathwayDisturbance::newpath.centrality(t(apop.mat),
+#                                                        alpha = 0.1,
+#                                                        beta = 0)
+# sink.vec     <- rowSums(sink.mat)
+# sink.rank    <- sink.vec
+#sink.rank  <- rank(sink.vec, ties.method = "min")
+
+
+
+row.names(test.mat) <- names(cent.vec)
+
+
+dif.array  <- rep(NA,1000)
+dif.array2 <- rep(NA,1000)
+dif.array3 <- rep(NA,1000)
+dif.array4 <- rep(NA,1000)
+dif.array[1]  <- 0
+dif.array2[1] <- 0
+dif.array3[1] <- 0
+for (i in 2:1000){
+    dif.array[i]  <-  sqrt(sum((test.mat[,i] - test.mat[,i-1]) **2))
+    dif.array2[i] <-  sqrt(sum((test.mat[,i] - test.mat[,2]) **2))
+    dif.array3[i] <-  sqrt(sum((test.mat2[,i] - test.mat2[,i-1]) **2))
+}
+
+
+plot(alpha.array[2:1000],dif.array2[2:1000],type = "l", xlab = "Alpha",
+     ylab = "Difference from Degree centrality",cex.lab=1.5)
+lines(beta.array[2:1000],dif.array[2:1000],type = "l", col = "red")
+lines(beta.array[2:1000],dif.array3[3:1000],type = "l", col = "blue")
+
+
+?rank
+
 
 #ii      <- cut(cent.vec, breaks = seq(min(cent.vec), max(cent.vec), len =40),
 #          include.lowest = TRUE)

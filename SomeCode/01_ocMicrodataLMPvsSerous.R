@@ -66,6 +66,8 @@ allKID       <- translateGeneID2KEGGID(tT.all.names)
 # documentations
 
 library(CADIA)
+library(RBGL)
+library(dplyr)
 
 set.seed(1)
 tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
@@ -73,57 +75,45 @@ tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
 
 
 
+tT.pathways <- as_data_frame(tT.pathways) %>% mutate_at(.,.vars = 2:9 , as.numeric)
+
+tT.pathways$Name <- as.character(tT.pathways$Name)
+
+nrow(tT.pathways)
+
 library(stringr)
 
 ## CADIA automatically produces NA's for the pathways that have large
 ## eigenvalues. In this case only ORA p-values are valid. Therefore, we exclude
 ## them from further analysis.
-tT.pathways.clean <- tT.pathways[!is.na(tT.pathways$`disturbance index`),]
-tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
-    tT.pathways.clean$`causal Disturbance`))
-    ,method = "BH")
-tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
-                                        (tT.pathways.clean$P_ORA)),method = "fdr")
-
-
-tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
-tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
-
-head(tT.pathways.clean[order(tT.pathways.clean$CDIST),],20)
-
-
-
 #The next few lines are for exporting results
 
-#tT.pathways.clean$KEGGID <- str_sub(tT.pathways.clean$KEGGID, end = -5)
 
-rownames(tT.pathways.clean) <- NULL
-
-Hodgkins.cdist  <- tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,]
-Hodgkins.ora    <- tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,]
-sapply(Hodgkins.cdist, mode)
+results.cdist  <- tT.pathways[tT.pathways$cadia < 0.05,]
+results.ora    <- tT.pathways[tT.pathways$ORAFDR <0.05,]
+sapply(tT.pathways, mode)
 
 
-Hodgkins.cdist <- Hodgkins.cdist[order(Hodgkins.cdist$CDIST),c(1,10,4,6,8,9)]
-Hodgkins.ora <- Hodgkins.ora[order(Hodgkins.ora$ORAFDR),c(1,10,8,9)]
-Hodgkins.cdist[,c(3,4,5,6)] <- mapply(as.character,Hodgkins.cdist[,c(3,4,5,6)])
-Hodgkins.cdist[,c(3,4,5,6)] <- mapply(as.numeric,Hodgkins.cdist[,c(3,4,5,6)])
+results.cdist <- results.cdist[order(results.cdist$cadia),c(1,10,4,6,8,9)]
+results.ora   <- results.ora[order(results.ora$ORAFDR),c(1,10,8,9)]
+results.cdist[,c(3,4,5,6)] <- mapply(as.character,results.cdist[,c(3,4,5,6)])
+results.cdist[,c(3,4,5,6)] <- mapply(as.numeric,results.cdist[,c(3,4,5,6)])
 
-Hodgkins.cdist[,c(3,4,5,6)] <- mapply(formatC,Hodgkins.cdist[,c(3,4,5,6)],
+results.cdist[,c(3,4,5,6)] <- mapply(formatC,results.cdist[,c(3,4,5,6)],
                                       MoreArgs = list(format = "e", digits = 2))
-Hodgkins.ora[,c(3,4)]   <- mapply(formatC,Hodgkins.ora[,c(3,4)],
+results.ora[,c(3,4)]   <- mapply(formatC,results.ora[,c(3,4)],
                                   MoreArgs = list(format = "e", digits = 2))
 
-Hodgkins.ora
-Hodgkins.cdist
+results.ora
+results.cdist
 
 
 library(xtable)
 options(xtable.floating = FALSE)
 options(xtable.timestamp = "")
 
-print(xtable(Hodgkins.cdist), include.rownames = FALSE)
-print(xtable(Hodgkins.ora), include.rownames = FALSE)
+print(xtable(results.cdist), include.rownames = FALSE)
+print(xtable(results.ora), include.rownames = FALSE)
 
 
 
@@ -134,27 +124,47 @@ print(xtable(Hodgkins.ora), include.rownames = FALSE)
 
 library(SPIA)
 
-
 deSPIA          <- tT.deGenes$logFC
 names(deSPIA)   <- tT.deGenes$Gene.ID
 allSPIA         <- tT.filter$Gene.ID
-
-
 
 set.seed(1)
 resSPIA <- spia(de=deSPIA,all=allSPIA,organism="hsa",nB=2000
                 ,plots=FALSE,beta=NULL,combine="fisher",verbose=FALSE)
 
-
 head(resSPIA)
 resSPIA.report     <- resSPIA[order(resSPIA$pGFdr),c(1,2,9)]
 resSPIA.report[,3] <- mapply(formatC,resSPIA.report[,3],
                              MoreArgs = list(format = "e", digits = 2))
-
 resSPIA.report     <- resSPIA.report[as.numeric(resSPIA.report$pGFdr) <0.05,]
+resSPIA.report     <- as_data_frame(resSPIA.report) %>%
+    dplyr::left_join(., tT.pathways,
+                     by = c("ID" = "KEGGID"))
+resSPIA.report[,11] <- mapply(formatC,resSPIA.report[,c(11)],
+                              MoreArgs = list(format = "e", digits = 2))
 
+resSPIA.report     <- resSPIA.report[,c(1,2,3,11)]
 print(xtable(resSPIA.report), include.rownames = FALSE)
 
+
+
+
+
+spia.report.sup  <- resSPIA[order(resSPIA$pGFdr),c(1,2,5,7,9)]
+spia.report.sup  <- as_data_frame(spia.report.sup) %>%
+                     dplyr::full_join(., tT.pathways,
+                     by = c("ID" = "KEGGID"))
+spia.report.sup <- spia.report.sup %>% filter(., pGFdr < 0.05| cadia < 0.05) %>%
+                   select(.,-c(7,8,10,12))
+
+
+spia.report.sup[,c(3,4,5,7,8,9,10)] <- mapply(formatC,spia.report.sup[,c(3,4,5,7,8,9,10)],
+                                              MoreArgs = list(format = "e", digits = 2))
+
+spia.report.sup[,c(1,6)] <- mapply(stringr::str_trunc,spia.report.sup[,c(1,6)],
+                                   MoreArgs = list(width = 17, side = c("right"),
+                                                   ellipsis = "..."))
+print(xtable(spia.report.sup), NA.string = "NA", include.rownames = FALSE)
 
 
 
@@ -174,7 +184,7 @@ kegg.gs=kg.hsa$kg.sets[kg.hsa$sigmet.idx]
 av.paths <- names(kegg.gs)
 av.paths <- str_sub(av.paths, start =10)
 pathways.collection.names[!(pathways.collection.names %in% av.paths)]
-p.kegg       <- pathways.collection.names %in% tT.pathways.clean$Name
+p.kegg       <- pathways.collection.names %in% tT.pathways$Name
 p.kegg.gsets <- lapply(pathways.collection[p.kegg],nodes)
 p.kegg.gsets <- mapply(str_sub,p.kegg.gsets, MoreArgs = list(start = 5) )
 names(p.kegg.gsets) <- pathways.collection.names[p.kegg]
@@ -198,32 +208,33 @@ csample <- grep("G1", fl)
 gsea.Res   <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample,
                    sample = csample, compare = "as.group",same.dir = F,
                    rank.test = F)
-
-gsea.less  <- data.frame(gsea.Res$less)
-gsea.less  <- tibble::rownames_to_column(gsea.less,"Name")
-gsea.less  <- select(gsea.less, c("Name","p.val","q.val"))
-gsea.less  <- dplyr::inner_join(gsea.less,tT.pathways.clean[,c("Name","KEGGID")],
-                                by = "Name")
-
-gsea.less  %<>% mutate(.,ID = KEGGID) %>%
-                select(.,c("Name","ID","p.val","q.val" )) %>%
-                filter(., p.val < 0.16)
-
-
-
-
-gsea.less.rep          <- gsea.less
-gsea.less.rep[,c(3,4)] <- mapply(formatC,gsea.less.rep[,c(3,4)],
-                           MoreArgs = list(format = "e", digits = 2))
-
-
-print(xtable(gsea.less.rep), include.rownames = FALSE)
+#####
+# gsea.less  <- data.frame(gsea.Res$less)
+# gsea.less  <- tibble::rownames_to_column(gsea.less,"Name")
+# gsea.less  <- select(gsea.less, c("Name","p.val","q.val"))
+# gsea.less  <- dplyr::inner_join(gsea.less,tT.pathways.clean[,c("Name","KEGGID")],
+#                                 by = "Name")
+#
+# gsea.less  %<>% mutate(.,ID = KEGGID) %>%
+#                 select(.,c("Name","ID","p.val","q.val" )) %>%
+#                 filter(., p.val < 0.16)
+#
+#
+#
+#
+# gsea.less.rep          <- gsea.less
+# gsea.less.rep[,c(3,4)] <- mapply(formatC,gsea.less.rep[,c(3,4)],
+#                            MoreArgs = list(format = "e", digits = 2))
+#
+#
+# print(xtable(gsea.less.rep), include.rownames = FALSE)
+#####
 
 gsea.great <- data.frame(gsea.Res$greater)
 gsea.great <- tibble::rownames_to_column(gsea.great,"Name")
 gsea.great <- select(gsea.great, c("Name","p.val","q.val"))
 gsea.great <- dplyr::inner_join(gsea.great,
-                                 tT.pathways.clean[,c("Name","KEGGID")],
+                                 tT.pathways[,c("Name","KEGGID")],
                                  by = "Name")
 
 gsea.great %<>% mutate(.,ID = KEGGID) %>%
@@ -263,7 +274,7 @@ fgseaRes[padj < 0.1,]
 fgseaRes   <- as_data_frame(fgseaRes)
 fgseaRes   <- select(fgseaRes, c("pathway","pval","padj"))
 fgseaRes   <- dplyr::inner_join(fgseaRes,
-                                tT.pathways.clean[,c("Name","KEGGID")],
+                                tT.pathways[,c("Name","KEGGID")],
                                 by = c("pathway" = "Name"))
 
 fgseaRes   %<>% mutate(.,ID = KEGGID) %>%

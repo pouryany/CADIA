@@ -4,8 +4,8 @@
 \alias{pathSampler.newPath}
 \title{Calculates the distrution of pathway disturbance}
 \usage{
-pathSampler.newPath(pathwayRefGraphExpanded, iterationNo, deKID, allKID, alpha,
-  statEval)
+pathSampler.newPath(pathwayRefGraphExpanded, iterationNo, deKID, allKID,
+  alpha, statEval)
 }
 \arguments{
 \item{pathwayRefGraphExpanded}{An KEGGGraph object of a pathway}

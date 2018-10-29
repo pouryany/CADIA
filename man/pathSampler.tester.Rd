@@ -4,7 +4,8 @@
 \alias{pathSampler.tester}
 \title{Calculates the distrution of pathway disturbance}
 \usage{
-pathSampler.tester(pathwayRefGraphExpanded, iterationNo, deKID, allKID, alpha)
+pathSampler.tester(pathwayRefGraphExpanded, iterationNo, deKID, allKID,
+  alpha)
 }
 \arguments{
 \item{pathwayRefGraphExpanded}{An KEGGGraph object of a pathway}

@@ -28,26 +28,28 @@ causalDisturbance <- function(deIDs, allIDs, iter = 2000, alpha = 0.1,
                                              pathways.collection.names[[i]],
                                              deIDs, allIDs,iter,
                                              alpha,statEval )))
-        print(cat("Pathway done \n pathway name:", pathways.collection.names[[i]]))
+
+         print(cat("Pathway done \n pathway name:",
+                  pathways.collection.names[[i]]))
     }
 
     res <- as.data.frame(res)
-    colnames(res) <- names(pathways.collection.names)
+    colnames(res)  <- names(pathways.collection.names)
     rownames(res)  <- c("Name","nodes","edges","P_ORA",
-                        "No. DE","disturbance index", "causal Disturbance")
+                        "No. DE","P_SSC", "causal Disturbance")
 
     res <- as.data.frame(t(res))
 
-    res.clean <- res[!is.na(res$`disturbance index`),]
+    res.clean        <- res[!is.na(res$`P_SSC`),]
     res.clean$cadia  <- p.adjust(as.numeric(as.character(
         res.clean$`causal Disturbance`)),method = fdrMethod)
 
     res.clean$ORAFDR <- p.adjust(as.numeric(as.character
                                 (res.clean$P_ORA)),method = fdrMethod)
 
-    res.clean$KEGGID <- str_sub(rownames(res.clean), end = -5)
-    rownames(res.clean) <- NULL
+    res.clean$KEGGID <- stringr::str_sub(rownames(res.clean), end = -5)
 
+     rownames(res.clean) <- NULL
     res.clean <- res.clean[order(res.clean$cadia),]
 
     res.clean[,c(4,6,7,8,9)] <- mapply(as.character,res.clean[,c(4,6,7,8,9)])
