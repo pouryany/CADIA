@@ -84,7 +84,8 @@ tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
                                  alpha = 0.1,statEval = 1)
 
 
-tT.pathways <- as_data_frame(tT.pathways) %>% mutate_at(.,.vars = 2:9 , as.numeric)
+tT.pathways <- as_data_frame(tT.pathways) %>%
+               mutate_at(.,.vars = 2:9 , as.numeric)
 
 tT.pathways$Name <- as.character(tT.pathways$Name)
 
@@ -276,20 +277,9 @@ fgseaRes.rep          <- fgseaRes
 fgseaRes.rep[,c(3,4)] <- mapply(formatC,fgseaRes[,c(3,4)],
                                 MoreArgs = list(format = "e", digits = 2))
 
-fgseaRes.rep <- fgseaRes.rep[order(as.numeric(fgseaRes.rep$padj),decreasing = F),]
+fgseaRes.rep <- fgseaRes.rep[order(as.numeric(fgseaRes.rep$padj),
+                                   decreasing = F),]
 print(xtable(fgseaRes.rep), include.rownames = FALSE)
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
