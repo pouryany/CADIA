@@ -70,14 +70,8 @@ library(RBGL)
 library(dplyr)
 
 set.seed(1)
-tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000,
-                                 alpha = 0.1 , statEval = 1)
+tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000)
 
-
-
-tT.pathways <- as_data_frame(tT.pathways) %>% mutate_at(.,.vars = 2:9 , as.numeric)
-
-tT.pathways$Name <- as.character(tT.pathways$Name)
 
 nrow(tT.pathways)
 

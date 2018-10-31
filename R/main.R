@@ -8,7 +8,7 @@
 #' @param beta   Relative importance of sink versus source
 #' @param statEval 0 for summation of source/sink centrality 1 for product
 #' @param fdrMethod choice of false disovery rate method. inherited from p.adjust
-#'
+#' @param verbose printing pathway processing report
 #' @return list containing pathway names, number of pathway nodes and edges,
 #'         Over-representation P-values, size of differentially expressed genes
 #'         in the pathway, and causal disturbance
@@ -17,7 +17,8 @@
 #'
 #'
 causalDisturbance <- function(deIDs, allIDs, iter = 2000, alpha = 0.1,
-                              beta =1,statEval = 1 , fdrMethod = "BH"){
+                              beta =1,statEval = 1 , fdrMethod = "BH",
+                              verbose =F){
 
 
     len     <- length(pathways.collection.names)
@@ -29,8 +30,9 @@ causalDisturbance <- function(deIDs, allIDs, iter = 2000, alpha = 0.1,
                                              deIDs, allIDs,iter,
                                              alpha,statEval )))
 
-         print(cat("Pathway done \n pathway name:",
-                  pathways.collection.names[[i]]))
+       if(verbose) { print(cat("Pathway done \n pathway name:",
+                     pathways.collection.names[[i]]))
+                   }
     }
 
     res <- as.data.frame(res)
@@ -57,6 +59,9 @@ causalDisturbance <- function(deIDs, allIDs, iter = 2000, alpha = 0.1,
     res.clean[,c(4,6,7,8,9)] <- mapply(formatC,res.clean[,c(4,6,7,8,9)],
                                     MoreArgs = list(format = "e", digits = 3))
 
+    res.clean      <- dplyr::as_data_frame(res.clean) %>%
+                      dplyr::mutate_at(.,.vars = 2:9 , as.numeric)
+    res.clean$Name <- as.character(res.clean$Name)
 
     return(res.clean)
 }

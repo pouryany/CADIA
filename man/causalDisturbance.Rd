@@ -6,7 +6,7 @@
 model. For more information, see publication doi>10.1145/3107411.3107488}
 \usage{
 causalDisturbance(deIDs, allIDs, iter = 2000, alpha = 0.1, beta = 1,
-  statEval = 1, fdrMethod = "BH")
+  statEval = 1, fdrMethod = "BH", verbose = F)
 }
 \arguments{
 \item{deIDs}{a list of differentially expressed genes}
@@ -22,6 +22,8 @@ causalDisturbance(deIDs, allIDs, iter = 2000, alpha = 0.1, beta = 1,
 \item{statEval}{0 for summation of source/sink centrality 1 for product}
 
 \item{fdrMethod}{choice of false disovery rate method. inherited from p.adjust}
+
+\item{verbose}{printing pathway processing report}
 }
 \value{
 list containing pathway names, number of pathway nodes and edges,
