@@ -9,9 +9,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Package Installation and Preparation
 
-Provide an package description
+You can install CADIA using devtool library. To install devtool run the following commnad:
+```{r, eval =FALSE }
+install.packages("devtool")
 
-Provide a session info
+```
+
+After having `devtools` installed, you can install `CADIA` from its github repository
+
+```{r, eval =FALSE }
+library(devtools)
+devtools::install_github("pouryany/CADIA")
+```
 
 
 ## Example Data Analysis
@@ -75,10 +84,15 @@ tT      <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
 Selecting differentially expressed genes and proper filtering.
 
 ```{r}
+# Filter out unannotated and duplicated genes
 tT.filter    <- tT[!is.na(tT$Gene.ID),]
 tT.filter    <- tT.filter[!duplicated(tT.filter$Gene.ID),]
+
+# Select a p-value and fold-change cut-off for differential expressions
 tT.deGenes   <- tT.filter[tT.filter$adj.P.Val < 0.05, ]
 tT.deGenes   <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
+
+# Parameters needed for CADIA. The name of all genes and DE genes.
 tT.all.names <- as.vector(tT.filter$Gene.ID)
 tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 ```
@@ -88,11 +102,13 @@ tT.de.names  <- as.vector(tT.deGenes$Gene.ID)
 
 ## Pathway Enrichment Analysis with CADIA
 
-Just run the following code.
+Just run the following code. The first argument is the ENTREZ ID of the differentially expressed genes. The second argument is the ENTREZ ID of all genes from the experiment. 
 
-```{r pressure, warning= FALSE}
+```{r pressure, message= FALSE, warning= FALSE}
 library(CADIA)
 library(dplyr)
+
+## CADIA uses random sampling, make sure to set the random seed for reproducing
 set.seed(1)
 tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 10000)
 head(tT.pathways)

@@ -4,9 +4,18 @@ CADIA Accompanying Manual and Walk Through
 Package Installation and Preparation
 ------------------------------------
 
-Provide an package description
+You can install CADIA using devtool library. To install devtool run the following commnad:
 
-Provide a session info
+``` r
+install.packages("devtool")
+```
+
+After having `devtools` installed, you can install `CADIA` from its github repository
+
+``` r
+library(devtools)
+devtools::install_github("pouryany/CADIA")
+```
 
 Example Data Analysis
 ---------------------

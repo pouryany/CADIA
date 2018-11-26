@@ -60,7 +60,7 @@ causalDisturbance <- function(deIDs, allIDs, iter = 2000, alpha = 0.1,
                                     MoreArgs = list(format = "e", digits = 3))
 
     res.clean      <- dplyr::as_data_frame(res.clean) %>%
-                      dplyr::mutate_at(.,.vars = 2:9 , as.numeric)
+                      dplyr::mutate_at(.,.vars = 4:9 , as.numeric)
     res.clean$Name <- as.character(res.clean$Name)
 
     return(res.clean)

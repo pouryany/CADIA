@@ -203,25 +203,6 @@ gsea.Res   <- gage(expdata.clean, gsets = p.kegg.gsets, ref = nsample,
                    sample = csample, compare = "as.group",same.dir = F,
                    rank.test = F)
 #####
-# gsea.less  <- data.frame(gsea.Res$less)
-# gsea.less  <- tibble::rownames_to_column(gsea.less,"Name")
-# gsea.less  <- select(gsea.less, c("Name","p.val","q.val"))
-# gsea.less  <- dplyr::inner_join(gsea.less,tT.pathways.clean[,c("Name","KEGGID")],
-#                                 by = "Name")
-#
-# gsea.less  %<>% mutate(.,ID = KEGGID) %>%
-#                 select(.,c("Name","ID","p.val","q.val" )) %>%
-#                 filter(., p.val < 0.16)
-#
-#
-#
-#
-# gsea.less.rep          <- gsea.less
-# gsea.less.rep[,c(3,4)] <- mapply(formatC,gsea.less.rep[,c(3,4)],
-#                            MoreArgs = list(format = "e", digits = 2))
-#
-#
-# print(xtable(gsea.less.rep), include.rownames = FALSE)
 #####
 
 gsea.great <- data.frame(gsea.Res$greater)
@@ -244,10 +225,12 @@ gsea.great.rep[,c(3,4)] <- mapply(formatC,gsea.great.rep[,c(3,4)],
 
 print(xtable(gsea.great.rep), include.rownames = FALSE)
 
+
+
+# Trying out the fGSEA package. Use the two commented lines below to install
+
 #library(devtools)
 #install_github("ctlab/fgsea")
-
-
 
 require(fgsea)
 library(ggplot2)
@@ -283,150 +266,6 @@ fgseaRes.rep[,c(3,4)] <- mapply(formatC,fgseaRes[,c(3,4)],
 
 
 print(xtable(fgseaRes.rep), include.rownames = FALSE)
-
-
-
-
-
-
-
-#Random Testing
-
-??data_frame
-
-library(dplyr)
-err.samples.ora <- data_frame()
-err.samples.cdist <- data_frame()
-for(i in 1:50){
-
-
-    for(j in 1:10){
-        tT.de.names   <- sample(tT.all.names,i*100)
-
-
-        tT.pathways <- causalDisturbance(tT.de.names,tT.all.names,iter = 2000, alpha = 0.1,statEval = 1)
-        tT.pathways.clean<- tT.pathways #[tT.pathways$`disturbance index` !=0,]
-        tT.pathways.clean$CDIST  <- p.adjust(as.numeric(as.character(
-            tT.pathways.clean$`causal Disturbance`))
-            ,method = "fdr")
-        tT.pathways.clean$ORAFDR <- p.adjust(as.numeric(as.character
-                                                        (tT.pathways.clean$P_ORA)),method = "fdr")
-
-        #hist(as.numeric(as.character(tT.pathways.clean$`causal Disturbance`)))
-
-        err.samples.cdist[j,i] <- nrow(tT.pathways.clean[tT.pathways.clean$CDIST < 0.05,])
-        err.samples.ora[j,i]   <- nrow(tT.pathways.clean[tT.pathways.clean$ORAFDR <0.05,])
-    }
-
-}
-
-err.cdist <- t(err.samples.cdist)
-err.cdist <- as.data.frame(err.cdist)
-err.cdist$av.err <- rowMeans(err.cdist) /148
-tail(t(err.samples.ora))
-
-err.ora <- t(err.samples.ora)
-err.ora <- as.data.frame(err.ora)
-err.ora$av.err <- rowMeans(err.ora) / 148
-
-plot(err.ora$av.err, col ="#e41a1c",cex =1.9,pch = "o",
-     xlab="Size of sample set (x100)" , ylab="ratio of false positives",cex.lab=1.8)
-#par(new=TRUE)
-points(err.cdist$av.err,cex =1.5,col ="#00441b",pch = 15)
-legend(x = 0, y = 0.002, legend = c("ORA", "CADIA"),
-       col= c("#e41a1c","#00441b"), cex = 2, pch = c(15,15))
-
-d <-cbind(err.cdist$av.err,err.ora$av.err)
-d <- as.data.frame(d)
-names(d) <- c("CADIA","ORA")
-d$iteration  <- 1:50 *100
-library(ggplot2)
-library(reshape)
-dm <- melt(d,id.vars = 3)
-ggplot(data = dm, aes(x = iteration, y = value, shape = variable,color = variable))+
-    geom_point(size = 5, stroke = 1.5)+
-    scale_shape( solid = TRUE)+
-    scale_color_manual(values = c("CADIA" = 'red4','ORA' = '#018571')) +
-    scale_shape_manual(values = c("CADIA" = 5,'ORA' = 4)) +
-    geom_hline(yintercept=0.05, size = 2, linetype="dashed", color = "red")+
-    theme_bw()+
-    labs(y = "Average false positives")+
-    theme(
-        axis.title = element_text(size = 30),
-        legend.text = element_text(size = 25),
-        axis.text=element_text(size= 30),
-        axis.text.y= element_text(size = 30),
-        legend.title=element_blank())
-
-write.csv(err.samples.cdist, file = "err_cdist")
-write.csv(err.samples.cdist, file = "err_ora")
-
-head(tT.pathways.clean[order(tT.pathways.clean$ORAFDR),],20)
-
-gg  <- pathways.collection[["04144.xml"]]
-cgg <- connectedComp(gg)
-subgg <- unique(unlist(cgg[which((lapply(cgg, length)) != 1)]))
-sgg <- subGraph(subgg,gg)
-# Testing the stability of  newpath Centrality
-
-testGraph <- pathways.collection[["05219.xml"]]
-testGraph.adj <- as(testGraph, "matrix")
-
-
-
-
-cent.matrix <- PathwayDisturbance::newpath.centrality(testGraph.adj,alpha = 0.5, beta = 0.5)
-
-
-
-
-
-
-
-
-causalDisturbance2 <- function(deIDs, allIDs, iter = 2000, alpha = 0.1,
-                              beta =1,statEval = 1 , fdrMethod = "BH"){
-
-
-    len     <- length(pathways.collection.names)
-    res     <- vector ("list", length = len)
-
-    for ( i in 1:len ) {
-        res[i] <- list(unlist(processPathway(pathways.collection[[i]],
-                                             pathways.collection.names[[i]],
-                                             deIDs, allIDs,iter,
-                                             alpha,statEval )))
-        print(cat("Pathway done \n pathway name:", pathways.collection.names[[i]]))
-    }
-
-    res <- as.data.frame(res)
-    colnames(res) <- names(pathways.collection.names)
-    rownames(res)  <- c("Name","nodes","edges","P_ORA",
-                        "No. DE","disturbance index", "causal Disturbance")
-
-    res <- as.data.frame(t(res))
-
-    res.clean <- res[!is.na(res$`disturbance index`),]
-    res.clean$cadia  <- p.adjust(as.numeric(as.character(
-        res.clean$`causal Disturbance`)),method = fdrMethod)
-
-    res.clean$ORAFDR <- p.adjust(as.numeric(as.character
-                                            (res.clean$P_ORA)),method = fdrMethod)
-
-    res.clean$KEGGID <- str_sub(rownames(res.clean), end = -5)
-    rownames(res.clean) <- NULL
-
-    res.clean <- res.clean[order(res.clean$cadia),]
-
-    res.clean[,c(4,6,7,8,9)] <- mapply(as.character,res.clean[,c(4,6,7,8,9)])
-    res.clean[,c(4,6,7,8,9)] <- mapply(as.numeric,res.clean[,c(4,6,7,8,9)])
-    res.clean[,c(4,6,7,8,9)] <- mapply(formatC,res.clean[,c(4,6,7,8,9)],
-                                       MoreArgs = list(format = "e", digits = 3))
-
-
-    return(res.clean)
-}
-
 
 
 
