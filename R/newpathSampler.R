@@ -5,8 +5,10 @@
 #' @param deKID KEGG ID of the differentially expressed genes
 #' @param allKID reference of all the genes with their respective KEGG IDs
 #'
+#'
 #' @return a  list of two objects. First is the sampling data for
 #' causal disturbance. The second one is the actual causal disturbance
+#'
 #'
 #'
 #' @export

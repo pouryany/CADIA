@@ -10,7 +10,8 @@
 #'
 #'
 #' @importFrom KEGGgraph    translateGeneID2KEGGID
-#'
+#' @importFrom graph    nodes
+#' @importFrom magrittr %>%
 #'
 
 processPathway <- function(pGraph,Name, deIDs, allIDs, iter,
@@ -44,7 +45,7 @@ processPathway <- function(pGraph,Name, deIDs, allIDs, iter,
          }
 
     #cat("pathway done: ", Name,"\n")
-    return(list(Name,numNodes(pGraph),numEdges(pGraph),fTestRes,
+    return(list(Name,graph::numNodes(pGraph),graph::numEdges(pGraph),fTestRes,
                 isDiff, disturbProb, causalDist))
 
 }

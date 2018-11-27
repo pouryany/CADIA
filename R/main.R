@@ -13,6 +13,10 @@
 #'         Over-representation P-values, size of differentially expressed genes
 #'         in the pathway, and causal disturbance
 #'
+#'
+#'
+#' @importFrom magrittr %>%
+#'
 #' @export
 #'
 #'
