@@ -20,8 +20,8 @@ Description: (Under construction) The package is designed for interpreting genom
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0
-Imports:  KEGGgraph,
+RoxygenNote: 6.1.1
+Imports: KEGGgraph,
           RBGL,
           graph,
           stringr,

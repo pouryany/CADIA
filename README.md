@@ -62,13 +62,13 @@ head(tT.pathways)
 
     ## # A tibble: 6 x 10
     ##   Name  nodes edges   P_ORA `No. DE`   P_SSC `causal Disturb…   cadia
-    ##   <chr> <fct> <fct>   <dbl>    <dbl>   <dbl>            <dbl>   <dbl>
-    ## 1 Micr… 299   518   3.66e-8       16 2.65e-1      0.000000189 2.70e-5
-    ## 2 Oocy… 124   424   3.13e-4       10 3.00e-4      0.00000162  1.09e-4
-    ## 3 p53 … 69    84    2.83e-7       10 4.80e-1      0.00000228  1.09e-4
-    ## 4 PI3K… 341   2677  7.34e-3       17 2.50e-3      0.000219    7.82e-3
-    ## 5 Ras … 229   1396  3.65e-1        8 2.00e-4      0.000768    2.19e-2
-    ## 6 Foca… 201   1854  1.01e-2       12 9.80e-3      0.00101     2.41e-2
-    ## # ... with 2 more variables: ORAFDR <dbl>, KEGGID <chr>
+    ##   <chr> <fct> <fct>   <dbl> <fct>      <dbl>            <dbl>   <dbl>
+    ## 1 Micr… 299   518   3.66e-8 30       2.65e-1      0.000000189 2.70e-5
+    ## 2 Oocy… 124   424   3.13e-4 18       3.00e-4      0.00000162  1.09e-4
+    ## 3 p53 … 69    84    2.83e-7 18       4.80e-1      0.00000228  1.09e-4
+    ## 4 PI3K… 341   2677  7.34e-3 34       2.50e-3      0.000219    7.82e-3
+    ## 5 Ras … 229   1396  3.65e-1 16       2.00e-4      0.000768    2.19e-2
+    ## 6 Foca… 201   1854  1.01e-2 22       9.80e-3      0.00101     2.41e-2
+    ## # … with 2 more variables: ORAFDR <dbl>, KEGGID <chr>
 
 In the above results, P\_ORA is the p-value of hypergeometric test. P\_SSC is the p-value of Source-Sink Centrality, Causal Disturbance is the combined p-value, and CADIA is the FDR corrected causal disturbance.
