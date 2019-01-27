@@ -5,7 +5,7 @@
 \title{Calculates the distrution of pathway disturbance}
 \usage{
 pathSampler.newPath(pathwayRefGraphExpanded, iterationNo, deKID, allKID,
-  alpha, statEval)
+  alpha, beta, statEval)
 }
 \arguments{
 \item{pathwayRefGraphExpanded}{An KEGGGraph object of a pathway}
@@ -14,7 +14,15 @@ pathSampler.newPath(pathwayRefGraphExpanded, iterationNo, deKID, allKID,
 
 \item{allKID}{reference of all the genes with their respective KEGG IDs}
 
+\item{alpha}{the dampening factor for Source/Sink Centrality}
+
+\item{beta}{the relative Source vs Sink factor}
+
+\item{statEval}{Choose 1 for product-based, 0 for summation-based}
+
 \item{interationNo}{number of rounds of sampling}
+
+\item{iter}{the number of iterations for causal disturbance}
 }
 \value{
 a  list of two objects. First is the sampling data for

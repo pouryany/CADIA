@@ -4,7 +4,7 @@
 \alias{processPathway}
 \title{Calculates some information regarding the pathways}
 \usage{
-processPathway(pGraph, Name, deIDs, allIDs, iter, alpha, statEval)
+processPathway(pGraph, Name, deIDs, allIDs, iter, alpha, beta, statEval)
 }
 \arguments{
 \item{pGraph}{a GraphNEL object containing the pathways}
@@ -12,6 +12,12 @@ processPathway(pGraph, Name, deIDs, allIDs, iter, alpha, statEval)
 \item{Name}{the pathway name}
 
 \item{iter}{the number of iterations for causal disturbance}
+
+\item{alpha}{the dampening factor for Source/Sink Centrality}
+
+\item{beta}{the relative Source vs Sink factor}
+
+\item{statEval}{Choose 1 for product-based, 0 for summation-based}
 
 \item{pathID}{KEGG ID of an input pathway}
 

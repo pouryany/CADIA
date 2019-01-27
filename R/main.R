@@ -32,7 +32,7 @@ causalDisturbance <- function(deIDs, allIDs, iter = 2000, alpha = 0.1,
         res[i] <- list(unlist(processPathway(pathways.collection[[i]],
                                              pathways.collection.names[[i]],
                                              deIDs, allIDs,iter,
-                                             alpha,statEval )))
+                                             alpha,beta,statEval )))
 
        if(verbose) { print(cat("Pathway done \n pathway name:",
                      pathways.collection.names[[i]]))

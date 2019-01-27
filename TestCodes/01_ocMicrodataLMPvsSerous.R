@@ -54,7 +54,7 @@ tT.deGenes <- tT.deGenes[abs(tT.deGenes$logFC) >1,]
 
 
 # Saving the list of Differentially expressed genes
-write.table(unlist(tT.deGenes$Gene.ID), "tTDEG", col.names = F, row.names = F)
+#write.table(unlist(tT.deGenes$Gene.ID), "tTDEG", col.names = F, row.names = F)
 
 
 tT.all.names <- as.vector(tT.filter$Gene.ID)

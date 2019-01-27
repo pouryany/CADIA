@@ -4,6 +4,10 @@
 #' @param interationNo number of rounds of sampling
 #' @param deKID KEGG ID of the differentially expressed genes
 #' @param allKID reference of all the genes with their respective KEGG IDs
+#' @param iter the number of iterations for causal disturbance
+#' @param alpha the dampening factor for Source/Sink Centrality
+#' @param beta the relative Source vs Sink factor
+#' @param statEval Choose 1 for product-based, 0 for summation-based
 #'
 #' @return a  list of two objects. First is the sampling data for
 #' causal disturbance. The second one is the actual causal disturbance
@@ -11,7 +15,7 @@
 #'
 #' @export
 pathSampler.newPath <- function(pathwayRefGraphExpanded,iterationNo, deKID,
-                                allKID,alpha, statEval) {
+                                allKID,alpha,beta, statEval) {
 
 
     totPathNodes     <- nodes(pathwayRefGraphExpanded)
@@ -41,7 +45,7 @@ pathSampler.newPath <- function(pathwayRefGraphExpanded,iterationNo, deKID,
         }else{
 
 
-            centr.mat <- newpath.centrality(pathMat, alpha, beta = 1)
+            centr.mat <- newpath.centrality(pathMat, alpha, beta)
             paths.tot <- sum(centr.mat)
             cdist.tot <- sum(centr.mat[deGenesInd,])
             causalDisturbance <- cdist.tot/paths.tot
@@ -83,7 +87,7 @@ pathSampler.newPath <- function(pathwayRefGraphExpanded,iterationNo, deKID,
             tryCatch({
 
 
-            centr.mat <- newpath.centrality(pathMat, alpha, beta = 1)
+            centr.mat <- newpath.centrality(pathMat, alpha, beta)
             paths.tot <- rowSums(centr.mat)
             cdist.tot <- rowSums(centr.mat[deGenesInd,])
             paths.log <- sum(log2(paths.tot))

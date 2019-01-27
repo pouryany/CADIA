@@ -7,6 +7,9 @@
 #' @param allKIDs list of all genes with their associated KEGG IDs
 #' @param keggRef list of reference genes from KEGG
 #' @param iter the number of iterations for causal disturbance
+#' @param alpha the dampening factor for Source/Sink Centrality
+#' @param beta the relative Source vs Sink factor
+#' @param statEval Choose 1 for product-based, 0 for summation-based
 #'
 #'
 #' @importFrom KEGGgraph    translateGeneID2KEGGID
@@ -15,7 +18,7 @@
 #'
 
 processPathway <- function(pGraph,Name, deIDs, allIDs, iter,
-                           alpha,statEval) {
+                           alpha,beta,statEval) {
 
     deKIDs   <- KEGGgraph::translateGeneID2KEGGID(deIDs)
     allKIDs  <- KEGGgraph::translateGeneID2KEGGID(allIDs)
@@ -35,7 +38,7 @@ processPathway <- function(pGraph,Name, deIDs, allIDs, iter,
     fTestRes        <- stats::phyper(isDiff - 1, totPath, allSize - totPath,
                                      deSize, lower.tail = F)
     disturbProb     <- pathSampler.newPath(pGraph, iter, deKIDs, allKIDs,
-                                           alpha,statEval)
+                                           alpha,beta,statEval)
 
     if(is.na(disturbProb)){
         causalDist <- fTestRes
