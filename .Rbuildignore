@@ -1,8 +1,5 @@
 ^data-raw$
-^tTDEG$
-^README$
-^README_files$
-^bibliography$
+^README\.Rmd$
 ^Meta$
 ^doc$
 ^.*\.Rproj$
