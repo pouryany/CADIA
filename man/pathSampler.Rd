@@ -22,7 +22,7 @@ pathSampler(inputGraph, deKID, iterationNo, alpha, beta, statEval = 1)
 \item{iter}{the number of iterations for causal disturbance}
 }
 \value{
-the probability of observing a subset of
+the probability of observing a subset with a higher aggeregate score
 }
 \description{
 Calculates the distribution of pathway disturbance

@@ -8,7 +8,7 @@
 #' @param beta the relative Source vs Sink factor
 #' @param statEval Choose 1 for product-based, 0 for summation-based
 #'
-#' @return the probability of observing a subset of
+#' @return the probability of observing a subset with a higher aggeregate score
 #'
 #'
 #' @export

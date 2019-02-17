@@ -55,7 +55,7 @@ After having `devtools` installed, you can install `CADIA` from its github repos
 
 ```{r, eval =FALSE }
 library(devtools)
-devtools::install_github("pouryany/CADIA")
+devtools::install_github("pouryany/CADIA",build_vignettes = TRUE)
 ```
 
 
@@ -78,7 +78,7 @@ This document contains a test case of CADIA using an ovarian cancer dataset by B
 
 NCBI-GEO portal provides and R-code generation tool for differential expression analysis of its datasets. The below code shows the automatically generated script for differential expression analysis of the GSE12172 dataset. In general, it uses the ``limma`` package to contrast the normalized expressions of two predefined subsets of the samples. For running the next code chunk you would need to have these packages installed: ``Biobase``, ``GEOquery``, and ``limma``.  If you already have a ``limma`` topTable object you may skip to the next section where we use a predefined table of this analysis. 
 
-```{r, message=F, warning= F}
+```{r, message=F, warning= F, eval= F}
 
 # The following lines are based on the code generated from NCBI GEO portal
 # Version info: R 3.2.3, Biobase 2.30.0, GEOquery 2.40.0, limma 3.26.8
@@ -138,7 +138,7 @@ tT               <- topTable(fit2, adjust="fdr", sort.by="B", number=Inf)
 
 Here, we will an topTable object that was produced from an ovarian cancer data set from NCBI GEO (GSE12172) [@ang08]. The instructions for producing the topTable object are provided in the previous sections. The next step for enrichment analysis is to identify a subset of differentially expressed genes. The specific platform of this data has multiple probes for each annotated genes. Also, some of the probes do not correspond to any annotated gene. After appropriate filtering for such instances, we use an adjusted p-value and fold-change criteria to identify the subset of DEG. Note that the end results of this analysis step are two lists ``tT.all.names`` and ``tT.de.names``.
 
-```{r}
+```{r, warning=F, message=F}
 library(CADIA)
 
 data(tT)
