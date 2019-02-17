@@ -1,2 +1,10 @@
+^data-raw$
+^tTDEG$
+^README.md$
+^README.Rmd$
+^README_files$
+^bibliography.bib$
+^Meta$
+^doc$
 ^.*\.Rproj$
 ^\.Rproj\.user$

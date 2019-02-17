@@ -48,7 +48,8 @@ causalDisturbance <- function(deIDs, allIDs, iter = 2000, alpha = 0.1,
 
     res.clean        <- res[!is.na(res$`P_SSC`),]
     res.clean$cadia  <- p.adjust(as.numeric(as.character(
-        res.clean$`causal Disturbance`)),method = fdrMethod)
+                                            res.clean$`causal Disturbance`)),
+                                 method = fdrMethod)
 
     res.clean$ORAFDR <- p.adjust(as.numeric(as.character
                                 (res.clean$P_ORA)),method = fdrMethod)
