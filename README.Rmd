@@ -64,7 +64,7 @@ The github page of CADIA packages contains associated the code and documentation
 
 The current version of CADIA works by taking two inputs of differentially expressed genes (DEG) and the gene universe. The output of CADIA is a list of KEGG pathways along with a group of p-values that describe the association of the pathway with a the DEG. 
 
-This document contains a test case of CADIA using an ovarian cancer dataset by Bowtell and colleagues, with 60  High-grade  serous  ovarian cancer  and  30  Low  malignant  potential  tumors. This data  is available from NCBI-GEO portal through  accession  code  GSE12172 [@ang08].  The datasets platform us affymetrix HG-U133b.
+This document contains a test case of CADIA using an ovarian cancer dataset by Bowtell and colleagues, with 60  High-grade  serous  ovarian cancer  and  30  Low  malignant  potential  tumors. This data  is available from NCBI-GEO portal through  accession  code  GSE12172 [@ang08].  The datasets platform is affymetrix HG-U133b.
 
 ## Finding differentially expressed genes
 

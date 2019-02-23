@@ -1,7 +1,7 @@
 CADIA Accompanying Manual and Walk Through
 ================
 Pourya Naderi Yeganeh
-2019-02-16
+2019-02-23
 
 Overview
 ========
@@ -53,7 +53,7 @@ Enrichment Analysis with CADIA
 
 The current version of CADIA works by taking two inputs of differentially expressed genes (DEG) and the gene universe. The output of CADIA is a list of KEGG pathways along with a group of p-values that describe the association of the pathway with a the DEG.
 
-This document contains a test case of CADIA using an ovarian cancer dataset by Bowtell and colleagues, with 60 High-grade serous ovarian cancer and 30 Low malignant potential tumors. This data is available from NCBI-GEO portal through accession code GSE12172 (Anglesio et al. 2008). The datasets platform us affymetrix HG-U133b.
+This document contains a test case of CADIA using an ovarian cancer dataset by Bowtell and colleagues, with 60 High-grade serous ovarian cancer and 30 Low malignant potential tumors. This data is available from NCBI-GEO portal through accession code GSE12172 (Anglesio et al. 2008). The datasets platform is affymetrix HG-U133b.
 
 Finding differentially expressed genes
 --------------------------------------
@@ -242,13 +242,13 @@ If you are interested in getting a list of pathways that are analyzed by CADIA y
 head(CADIA::cadia.paths())
 ```
 
-    ##           KEGG_IDs pathways.collection.names
-    ## 04014.xml    04014     Ras signaling pathway
-    ## 04015.xml    04015    Rap1 signaling pathway
-    ## 04010.xml    04010    MAPK signaling pathway
-    ## 04012.xml    04012    ErbB signaling pathway
-    ## 04310.xml    04310     Wnt signaling pathway
-    ## 04330.xml    04330   Notch signaling pathway
+    ##   KEGG_IDs pathways.collection.names
+    ## 1    04014     Ras signaling pathway
+    ## 2    04015    Rap1 signaling pathway
+    ## 3    04010    MAPK signaling pathway
+    ## 4    04012    ErbB signaling pathway
+    ## 5    04310     Wnt signaling pathway
+    ## 6    04330   Notch signaling pathway
 
 One might be intresed to retrieve the differentially expressed genes associated with the significantly enriched pathways, or a subset of them. The function `geneReport()` faciliates this operation by returning a list containing the pathways and the list of their DEG (in ENTREZ format) concatenated in the rows. See the following.
 
