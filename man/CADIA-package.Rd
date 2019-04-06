@@ -6,15 +6,19 @@
 \alias{CADIA-package}
 \title{CADIA: Pathway enrichment analysis of genomic using Causal Disturbance Analysis}
 \description{
-(Under construction) The package is designed for interpreting genomic data by leveraging
-             genetic interactions. Typical inputs of this program are two lists
-             of genes, one contains a target list from an experiment and the 
-             other contains all the genes in the experimental array. The output
-             of the program is list of pathways and their respective p-values.
-             In the current version, the pathways are retrieved from KEGG. 
-             If you wish to use this package in your publication or for your 
-             project please cite the following publication:
-             Naderi Yeganeh, Pourya, and M. Taghi Mostafavi. "Use of Structural 
+The package is designed for interpreting high-throughput experimental 
+             data by leveraging gene interactions. Typical inputs of this program 
+             are two lists of genes, one contains a target list from an 
+             experiment and the other contains all the genes in the experimental
+             array. The output of the program is list of pathways and their 
+             respective p-values. In the current version, the pathways are
+             retrieved from KEGG. If you wish to use this package in your 
+             publication or for your project please cite the following publications:
+             1- P. Naderi Yeganeh and M. T. Mostafavi, "Causal Disturbance 
+             Analysis: A Novel Graph Centrality Based Method for Pathway Enrichment
+             Analysis," in IEEE/ACM Transactions on Computational Biology and 
+             Bioinformatics. doi: 10.1109/TCBB.2019.2907246 
+             2- Naderi Yeganeh, Pourya, and M. Taghi Mostafavi. "Use of Structural 
              Properties of Underlying Graphs in Pathway Enrichment Analysis of 
              Genomic Data." In Proceedings of the 8th ACM International
              Conference on Bioinformatics,Computational Biology, and 

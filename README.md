@@ -1,12 +1,17 @@
 CADIA Accompanying Manual and Walk Through
 ================
 Pourya Naderi Yeganeh
-2019-02-23
+2019-04-06
 
 Overview
 ========
 
 This document contains the walk-through/tutorial for the Causal Disturbance Analysis (CADIA) as described in the corresponding publication by Naderi and Mostafavi (References to be provided). CADIA is an enrichment analysis tool for interpreting gene perturbations by contrasting them with underlying graphs of annotated pathways. This program takes an input list of differentially expressed gene IDs and a gene universe and produces p-values that indicate pathway enrichments.
+
+Citation
+========
+
+The material presented in this tutorial and package can be cited through this article: P. Naderi Yeganeh and M. T. Mostafavi, "Causal Disturbance Analysis: A Novel Graph Centrality Based Method for Pathway Enrichment Analysis," in IEEE/ACM Transactions on Computational Biology and Bioinformatics. doi: 10.1109/TCBB.2019.2907246
 
 Dependencies and Installation guide
 ===================================
